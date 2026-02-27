@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planner Varejo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Planner Varejo</h1>
+        <p>Organize tarefas diárias da loja com prioridade e prazo.</p>
+      </header>
+
+      <form id="task-form" class="task-form">
+        <input id="task-input" type="text" placeholder="Ex: Conferir estoque de bebidas" required />
+        <select id="priority-select" aria-label="Prioridade">
+          <option value="Alta">Alta</option>
+          <option value="Média" selected>Média</option>
+          <option value="Baixa">Baixa</option>
+        </select>
+        <input id="date-input" type="date" />
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <section class="panel">
+        <h2>Tarefas</h2>
+        <ul id="task-list" class="task-list"></ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
