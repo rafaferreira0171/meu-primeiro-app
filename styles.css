@@ -4,9 +4,7 @@
   --text: #1f2937;
   --muted: #6b7280;
   --accent: #2563eb;
-  --accent-dark: #1e40af;
-  --border: #e5e7eb;
-  --success: #16a34a;
+  --danger: #dc2626;
 }
 
 * {
@@ -16,149 +14,98 @@
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #eff4ff 0%, #f8fafc 100%);
+  background: var(--bg);
   color: var(--text);
 }
 
 .container {
-  max-width: 1100px;
-  margin: 24px auto;
-  padding: 0 16px 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
+  max-width: 760px;
+  margin: 32px auto;
   background: var(--card);
-  border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 h1,
-h2,
-h3,
-p {
-  margin: 0;
+h2 {
+  margin: 0 0 8px;
 }
 
-.header p {
-  margin-top: 6px;
+header p {
+  margin: 0 0 20px;
   color: var(--muted);
-  max-width: 700px;
 }
 
-#excel-input {
-  display: none;
+.task-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.upload-btn {
+.task-form input,
+.task-form select,
+.task-form button {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.task-form button {
   background: var(--accent);
   color: #fff;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-weight: 700;
+  border: none;
   cursor: pointer;
-  white-space: nowrap;
 }
 
-.upload-btn:hover {
-  background: var(--accent-dark);
-}
-
-.tips {
-  background: #ecfdf5;
-  border: 1px solid #bbf7d0;
-  color: #065f46;
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.kpis {
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
 }
 
-.card h3 {
+.meta {
   color: var(--muted);
-  margin-bottom: 10px;
   font-size: 14px;
 }
 
-.card p {
-  font-size: 28px;
-  font-weight: 700;
+.priority {
+  font-weight: bold;
 }
 
-.panel-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 12px;
+.priority.Alta {
+  color: var(--danger);
 }
 
-.panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
+.priority.Média {
+  color: #d97706;
 }
 
-.panel h2 {
-  margin-bottom: 12px;
+.priority.Baixa {
+  color: #16a34a;
 }
 
-.table-wrap {
-  overflow-x: auto;
+.remove-btn {
+  border: none;
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th,
-td {
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  padding: 10px 8px;
-  font-size: 14px;
-}
-
-th {
-  color: var(--muted);
-}
-
-.empty {
-  text-align: center;
-  color: var(--muted);
-}
-
-.top-1 td:nth-child(2) {
-  color: var(--success);
-  font-weight: 700;
-}
-
-@media (max-width: 900px) {
-  .kpis,
-  .panel-grid {
+@media (max-width: 700px) {
+  .task-form {
     grid-template-columns: 1fr;
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }

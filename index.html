@@ -3,72 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel de Gestão de Varejo</title>
+    <title>Planner Varejo</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <main class="container">
-      <header class="header">
-        <div>
-          <h1>Painel de Gestão de Varejo</h1>
-          <p>
-            Faça upload da planilha e acompanhe ticket médio, peças por atendimento,
-            ranking de lojas e vendas por loja.
-          </p>
-        </div>
-        <label class="upload-btn" for="excel-input">Upload de Excel</label>
-        <input id="excel-input" type="file" accept=".xlsx,.xls" />
+      <header>
+        <h1>Planner Varejo</h1>
+        <p>Organize tarefas diárias da loja com prioridade e prazo.</p>
       </header>
 
-      <section class="tips">
-        <h2>Formato esperado da planilha</h2>
-        <p>Colunas obrigatórias: <strong>Loja</strong>, <strong>Vendas</strong>, <strong>Atendimentos</strong>, <strong>Peças</strong>.</p>
-      </section>
+      <form id="task-form" class="task-form">
+        <input id="task-input" type="text" placeholder="Ex: Conferir estoque de bebidas" required />
+        <select id="priority-select" aria-label="Prioridade">
+          <option value="Alta">Alta</option>
+          <option value="Média" selected>Média</option>
+          <option value="Baixa">Baixa</option>
+        </select>
+        <input id="date-input" type="date" />
+        <button type="submit">Adicionar</button>
+      </form>
 
-      <section class="kpis">
-        <article class="card">
-          <h3>Faturamento Total</h3>
-          <p id="total-sales">R$ 0,00</p>
-        </article>
-        <article class="card">
-          <h3>Ticket Médio</h3>
-          <p id="avg-ticket">R$ 0,00</p>
-        </article>
-        <article class="card">
-          <h3>Peças por Atendimento</h3>
-          <p id="items-per-service">0,00</p>
-        </article>
-      </section>
-
-      <section class="panel-grid">
-        <article class="panel">
-          <h2>Ranking de Lojas</h2>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Loja</th>
-                  <th>Vendas</th>
-                  <th>Atendimentos</th>
-                  <th>Peças</th>
-                </tr>
-              </thead>
-              <tbody id="ranking-body">
-                <tr>
-                  <td colspan="5" class="empty">Faça upload da planilha para visualizar os dados.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
-
-        <article class="panel">
-          <h2>Gráfico de Vendas por Loja</h2>
-          <canvas id="sales-chart" height="250"></canvas>
-        </article>
+      <section class="panel">
+        <h2>Tarefas</h2>
+        <ul id="task-list" class="task-list"></ul>
       </section>
     </main>
 
