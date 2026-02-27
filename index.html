@@ -1,35 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Planner Varejo</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="container">
-      <header>
-        <h1>Planner Varejo</h1>
-        <p>Organize tarefas diárias da loja com prioridade e prazo.</p>
-      </header>
+<head>
+<meta charset="UTF-8">
+<title>Planner Varejo Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
 
-      <form id="task-form" class="task-form">
-        <input id="task-input" type="text" placeholder="Ex: Conferir estoque de bebidas" required />
-        <select id="priority-select" aria-label="Prioridade">
-          <option value="Alta">Alta</option>
-          <option value="Média" selected>Média</option>
-          <option value="Baixa">Baixa</option>
-        </select>
-        <input id="date-input" type="date" />
-        <button type="submit">Adicionar</button>
-      </form>
+<body>
 
-      <section class="panel">
-        <h2>Tarefas</h2>
-        <ul id="task-list" class="task-list"></ul>
-      </section>
-    </main>
+<h1>Dashboard Varejo</h1>
 
-    <script src="app.js"></script>
-  </body>
+<input type="file" id="excel-input" />
+
+<div>
+<h3>Total Vendas: <span id="total-sales">0</span></h3>
+<h3>Ticket Médio: <span id="avg-ticket">0</span></h3>
+<h3>Peças por Atendimento: <span id="items-per-service">0</span></h3>
+</div>
+
+<h2>Ranking de Lojas</h2>
+<table border="1">
+<thead>
+<tr>
+<th>Loja</th>
+<th>Vendas</th>
+</tr>
+</thead>
+<tbody id="ranking-body"></tbody>
+</table>
+
+<h2>Gráfico de Vendas</h2>
+<canvas id="sales-chart"></canvas>
+
+<script src="app.js"></script>
+
+</body>
 </html>
