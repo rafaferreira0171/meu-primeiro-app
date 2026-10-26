@@ -20,6 +20,8 @@ jobs:
       - name: Patch Dash current-month KPI logic
         run: python3 scripts/patch_dash.py
       - run: npm install --no-audit --no-fund
+      - name: Validate planning and history rules
+        run: node scripts/planning-guard.mjs
       - run: npm run build
       - name: Commit Dash fix
         run: |
