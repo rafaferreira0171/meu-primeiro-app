@@ -13,24 +13,42 @@ export const FLUXO_FIELDS = [
 
 export const AUTO_TAX = 360
 
-export function totalEmpregada(e) {
-  if (!e) return 0
-  return Number(e.salario || 0) + Number(e.dias_uteis || 0) * (Number(e.passagem_scs || 0) + Number(e.passagem_sp || 0))
+export function totalPrestador(p) {
+  if (!p) return 0
+  return Number(p.salario || 0) + Number(p.dias_uteis || 0) * (Number(p.passagem_scs || 0) + Number(p.passagem_sp || 0))
 }
 
-export function calcFluxoMonth(fluxo, empregada, despesas = []) {
-  const entries = Number(fluxo?.salario || 0) + Number(fluxo?.va || 0)
+export function totalPrestadores(list = []) {
+  return list.reduce((sum, p) => sum + totalPrestador(p), 0)
+}
+
+export function calcFluxoMonth(fluxo, prestadores = [], despesas = [], entradas = []) {
+  const legacyEntries = Number(fluxo?.salario || 0) + Number(fluxo?.va || 0)
+  const extraEntries = entradas.reduce((sum, item) => sum + Number(item.valor || 0), 0)
+  const entries = legacyEntries + extraEntries
   const fixed = FLUXO_FIELDS.reduce((sum, [key]) => sum + Number(fluxo?.[key] || 0), 0)
   const custom = despesas.reduce((sum, item) => sum + Number(item.valor || 0), 0)
-  const auto = totalEmpregada(empregada) / 2 + AUTO_TAX
+  const auto = totalPrestadores(prestadores) / 2 + AUTO_TAX
   const expenses = fixed + custom + auto
-  return { entries, expenses, balance: entries - expenses, employeeHalf: totalEmpregada(empregada) / 2, tax: AUTO_TAX }
+  return { entries, expenses, balance: entries - expenses, employeeHalf: totalPrestadores(prestadores) / 2, tax: AUTO_TAX }
 }
 
-export function calcPixMonth(fluxo, empregada) {
-  const employeeHalf = totalEmpregada(empregada) / 2
+export function calcPixMonth(fluxo, prestadores = []) {
+  const employeeHalf = totalPrestadores(prestadores) / 2
   const convenio = Number(fluxo?.convenio || 0)
   return { employeeHalf, convenio, total: employeeHalf + convenio }
+}
+
+export function transferItemValue(item, fluxo, prestadores = [], despesas = []) {
+  if (!item) return 0
+  if (item.type === 'fluxo') return Number(fluxo?.[item.key] || 0)
+  if (item.type === 'despesa') return Number(despesas.find(d => d.id === item.key)?.valor || 0)
+  if (item.type === 'prestador_half') return totalPrestador(prestadores.find(p => p.id === item.key)) / 2
+  return 0
+}
+
+export function calcTransfer(transfer, fluxo, prestadores = [], despesas = []) {
+  return (transfer?.items || []).reduce((sum, item) => sum + transferItemValue(item, fluxo, prestadores, despesas), 0)
 }
 
 export function calcBudgetMonth(gastos, month) {
