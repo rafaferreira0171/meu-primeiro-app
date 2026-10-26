@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Patch Dash current-month KPI logic
-        if: ${{ !contains(github.event.head_commit.message, 'Fix Dash current month') }}
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -25,6 +24,11 @@ jobs:
           start = text.find('function Dash({data}){')
           if start < 0:
               raise SystemExit('Dash function not found')
+
+          # If the Dash already uses currentMonth(), it was already patched.
+          marker = 'const now=currentMonth(),plannedMonths=planningMonths(now,12)'
+          if marker in text[start:start+5000]:
+              raise SystemExit(0)
 
           depth = 0
           i = start
@@ -63,7 +67,6 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - name: Commit Dash fix
-        if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, 'Fix Dash current month') }}
         run: |
           if git diff --quiet -- src/main.jsx; then exit 0; fi
           git config user.name 'github-actions[bot]'
