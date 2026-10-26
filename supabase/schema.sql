@@ -19,17 +19,20 @@ create table if not exists public.empregada (
 );
 create table if not exists public.prestador (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
-  prestador_id uuid not null, month text not null, nome text not null,
+  prestador_id uuid, month text not null, nome text not null,
   salario numeric not null default 1400, dias_uteis numeric not null default 40,
-  passagem_scs numeric not null default 5, passagem_sp numeric not null default 5.9
+  passagem_scs numeric not null default 5, passagem_sp numeric not null default 5.9,
+  ativo boolean not null default true
 );
 create table if not exists public.entrada (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
-  month text not null, nome text not null, valor numeric not null default 0
+  series_id uuid, month text not null, nome text not null, valor numeric not null default 0,
+  ativo boolean not null default true
 );
 create table if not exists public.despesa (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
-  month text not null, nome text not null, valor numeric not null default 0
+  series_id uuid, month text not null, nome text not null, valor numeric not null default 0,
+  ativo boolean not null default true
 );
 create table if not exists public.gasto (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
@@ -38,8 +41,19 @@ create table if not exists public.gasto (
 );
 create table if not exists public.transferencia (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
-  month text not null, nome text not null, items jsonb not null default '[]'::jsonb
+  series_id uuid, month text not null, nome text not null, items jsonb not null default '[]'::jsonb,
+  ativo boolean not null default true
 );
+
+-- Safe upgrades for an already-created Supabase project.
+alter table public.prestador add column if not exists prestador_id uuid;
+alter table public.prestador add column if not exists ativo boolean not null default true;
+alter table public.entrada add column if not exists series_id uuid;
+alter table public.entrada add column if not exists ativo boolean not null default true;
+alter table public.despesa add column if not exists series_id uuid;
+alter table public.despesa add column if not exists ativo boolean not null default true;
+alter table public.transferencia add column if not exists series_id uuid;
+alter table public.transferencia add column if not exists ativo boolean not null default true;
 
 alter table public.fluxo enable row level security;
 alter table public.empregada enable row level security;
