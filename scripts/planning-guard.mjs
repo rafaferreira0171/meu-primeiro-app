@@ -29,6 +29,7 @@ assert.equal(total,1836,'Total do prestador deve considerar salário e passagens
 assert.equal(fluxoPrestadorPercent(prestador),550.8,'Percentual de 30% deve direcionar 30% do total ao Fluxo')
 assert.equal(fluxoPrestadorPercent({...prestador,fluxo_percent:0}),0,'Percentual de 0% deve direcionar R$ 0 ao Fluxo')
 assert.equal(fluxoPrestadorPercent({...prestador,fluxo_percent:100}),total,'Percentual de 100% deve direcionar 100% do total ao Fluxo')
+assert.equal(fluxoPrestadorPercent({salario:100,dias_uteis:0,passagem_scs:0,passagem_sp:0}),50,'Prestador antigo sem percentual deve manter compatibilidade com 50%')
 const fm=calcFluxoMonth(fluxo,[prestador],[despesa],[extra])
 assert.equal(fm.entries,13700,'Entradas devem somar salário, VA e entradas extras')
 assert.equal(fm.employeeTotal,550.8,'O Fluxo deve usar o percentual individual do prestador')
