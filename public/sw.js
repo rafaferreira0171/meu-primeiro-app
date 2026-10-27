@@ -1,4 +1,4 @@
-const CACHE='looklip-finance-v1'
+const CACHE='looklip-finance-v2'
 const APP_SHELL=['/meu-primeiro-app/','/meu-primeiro-app/looklip-icon.svg','/meu-primeiro-app/manifest.webmanifest']
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))})
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))})
