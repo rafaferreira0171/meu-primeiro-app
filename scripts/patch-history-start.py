@@ -1,17 +1,14 @@
-# LookLiP Finance final history + clean-start patch
+# LookLiP Finance history-aware planning patch
 from pathlib import Path
-import re
 
 p=Path('src/main.jsx')
 s=p.read_text()
 
-# Replace the development seed with a truly empty production seed.
-old_seed="const baseFluxo={salario:12000,va:700,condominio:975,iptu:145,gas:430,internet:90,luz:160,mercado:3000,combustivel:700,seguro_carro:250,convenio:1651,cartao:1718,celular:69,academia:149,contabilidade:250,pernambucanas:71,assin_chat:45,assin_apple:8,assin_ifood:19,assin_uber:19,outros:153}"
-if old_seed in s:
-    s=s.replace(old_seed,"const baseFluxo={salario:0,va:0,condominio:0,iptu:0,gas:0,internet:0,luz:0,mercado:0,combustivel:0,seguro_carro:0,convenio:0,cartao:0,celular:0,cabelo:0,academia:0,contabilidade:0,pernambucanas:0,assin_chat:0,assin_apple:0,assin_ifood:0,assin_uber:0,outros:0}",1)
-s=s.replace("seed={fluxo:MONTHS.map(makeFluxo),entradas:[],prestadores:[],despesas:[],gastos:[],transferencias:[],budgetAccounts:[]}","seed={fluxo:[],entradas:[],prestadores:[],despesas:[],gastos:[],transferencias:[],budgetAccounts:[]}",1)
+# Keep the development/demo values intact for validation.
+if 'const baseFluxo={salario:12000' not in s:
+    raise SystemExit('demo seed not found; refusing to alter seed')
 
-# Replace normalizeData with a history-safe rolling planner. Historical months are preserved;
+# Replace normalizeData with history-safe rolling planning. Historical months are preserved;
 # only months from the user's start month onward are exposed, with a rolling 12-month projection.
 start=s.index('function normalizeData(')
 end=s.index('function useFinance()',start)
@@ -19,11 +16,11 @@ new_normalize='''function normalizeData(raw={}){const d={...seed,...raw,fluxo:[.
 '''
 s=s[:start]+new_normalize+s[end:]
 
-# Safety checks: never perform the clean seed unless the history-aware implementation is now present.
+# Safety checks: history logic must be present and demo seed must remain.
 if 'const existingMonths=' not in s or 'd.startMonth=' not in s or 'const historyMonths=' not in s:
-    raise SystemExit('history-aware normalizeData is not present; refusing clean reset')
-if 'const baseFluxo={salario:0' not in s or 'seed={fluxo:[]' not in s:
-    raise SystemExit('clean production seed was not applied')
+    raise SystemExit('history-aware normalizeData was not applied')
+if 'const baseFluxo={salario:12000' not in s or 'seed={fluxo:MONTHS.map(makeFluxo)' not in s:
+    raise SystemExit('demo seed was changed unexpectedly')
 
 p.write_text(s)
-print('history-aware normalization and clean production seed applied')
+print('history-aware normalization applied; demo seed preserved')
