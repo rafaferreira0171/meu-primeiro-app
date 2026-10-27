@@ -2,7 +2,8 @@ name: Deploy LookLiP Finance to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -20,27 +21,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
-
+          cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-
-      - name: Build app
+      - name: Build Vite app
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
-      - name: Verify Vite output
+      - name: Verify compiled output
         run: |
           test -f dist/index.html
-          test -f dist/assets/index.css || true
-          echo "Vite build ready for GitHub Pages"
-
+          test -d dist/assets
+          ! grep -q 'src/main.jsx' dist/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -53,6 +50,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy compiled Vite artifact
         id: deployment
         uses: actions/deploy-pages@v4
