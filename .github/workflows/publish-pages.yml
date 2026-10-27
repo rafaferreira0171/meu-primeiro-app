@@ -1,5 +1,6 @@
 name: Publish LookLiP Finance
 
+# Trigger Pages redeploy for Safari compatibility fix
 on:
   push:
     branches: [main]
