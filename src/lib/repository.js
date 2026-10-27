@@ -12,6 +12,21 @@ export async function loadFinanceData(userId) {
   return Object.fromEntries(results)
 }
 
+export async function loadUserSettings(userId) {
+  if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
+  const { data, error } = await supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle()
+  if (error) throw error
+  return data || null
+}
+
+export async function upsertUserSettings(userId, settings) {
+  if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
+  const payload = { user_id: userId, ...settings, updated_at: new Date().toISOString() }
+  const { data, error } = await supabase.from('user_settings').upsert(payload, { onConflict: 'user_id' }).select().single()
+  if (error) throw error
+  return data
+}
+
 export async function upsertRows(table, rows, userId) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
   if (!rows.length) return []
