@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import assert from 'node:assert/strict'
-import {currentMonth,planningMonths,addMonths,calcFluxoMonth,calcTransfer,totalPrestador} from '../src/lib/finance.js'
+import {currentMonth,planningMonths,addMonths,calcFluxoMonth,calcPixMonth,calcTransfer,totalPrestador} from '../src/lib/finance.js'
 
 const source=fs.readFileSync(new URL('../src/main.jsx',import.meta.url),'utf8')
 const now=currentMonth()
@@ -21,7 +21,8 @@ const fm=calcFluxoMonth(fluxo,[prestador],[despesa],[extra])
 assert.equal(fm.entries,13700,'Entradas devem somar salário, VA e entradas extras')
 assert.equal(fm.employeeTotal,totalPrestador(prestador),'Prestadores devem alimentar o Fluxo pelo total do card')
 assert.equal(fm.expenses,1000+50+totalPrestador(prestador)+360,'Despesa Prestadores no Fluxo deve usar 100% do total')
-assert.equal(totalPrestador(prestador)/2,918,'50% deve permanecer disponível apenas para divisão/Pix')
+const pix=calcPixMonth(fluxo,[prestador])
+assert.equal(pix.employeeHalf,918,'50% deve permanecer disponível apenas para divisão/Pix')
 assert.equal(fm.tax,360,'Imposto automático deve permanecer em R$ 360')
 assert.equal(fm.balance,fm.entries-fm.expenses,'Saldo deve ser entradas menos despesas')
 
