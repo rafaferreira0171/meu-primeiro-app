@@ -38,6 +38,7 @@ jobs:
           test -f dist/index.html
           test -d dist/assets
           ! grep -q 'src/main.jsx' dist/index.html
+          echo "LOOKLIP_VITE_BUILD_OK"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
