@@ -38,6 +38,10 @@ jobs:
           grep -q "assets/" dist/index.html
           test ! -f dist/sw.js
           echo "Compiled Vite output verified without legacy service worker"
+      - name: Verify React entry is compiled
+        run: |
+          grep -q "createRoot" dist/assets/*.js
+          echo "React entrypoint is present in compiled assets"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
