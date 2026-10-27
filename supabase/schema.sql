@@ -64,6 +64,18 @@ alter table public.gasto drop constraint if exists gasto_conta_check;
 alter table public.budget_account add column if not exists legacy_key text;
 alter table public.budget_account add column if not exists ativo boolean not null default true;
 
+-- Per-user onboarding state. The first authenticated session is anchored to its current month.
+create table if not exists public.user_settings (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  start_month text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.user_settings enable row level security;
+drop policy if exists "Users manage own user_settings" on public.user_settings;
+create policy "Users manage own user_settings" on public.user_settings for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create index if not exists user_settings_user_idx on public.user_settings(user_id);
+
 alter table public.fluxo enable row level security;
 alter table public.empregada enable row level security;
 alter table public.prestador enable row level security;
