@@ -22,6 +22,7 @@ create table if not exists public.prestador (
   prestador_id uuid, month text not null, nome text not null,
   salario numeric not null default 0, dias_uteis numeric not null default 0,
   passagem_scs numeric not null default 0, passagem_sp numeric not null default 0,
+  fluxo_percent numeric not null default 50,
   ativo boolean not null default true
 );
 create table if not exists public.entrada (
@@ -52,6 +53,7 @@ create table if not exists public.budget_account (
 
 -- Safe upgrades for an already-created Supabase project.
 alter table public.prestador add column if not exists prestador_id uuid;
+alter table public.prestador add column if not exists fluxo_percent numeric not null default 50;
 alter table public.prestador add column if not exists ativo boolean not null default true;
 alter table public.entrada add column if not exists series_id uuid;
 alter table public.entrada add column if not exists ativo boolean not null default true;
