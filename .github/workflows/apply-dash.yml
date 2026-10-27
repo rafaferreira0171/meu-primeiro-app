@@ -1,8 +1,9 @@
-name: Apply LookLiP Dash
+name: Apply LookLiP Finance patches
 on:
   push:
     paths:
       - 'scripts/patch-dash-intelligence.py'
+      - 'scripts/patch-history-start.py'
       - 'src/main.jsx'
   workflow_dispatch:
 permissions:
@@ -15,6 +16,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Patch history rules
+        run: python3 scripts/patch-history-start.py
       - name: Patch Dash
         run: python3 scripts/patch-dash-intelligence.py
       - name: Validate build
@@ -24,5 +27,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/main.jsx
-          git diff --cached --quiet || git commit -m 'Improve LookLiP Dash expense intelligence'
+          git diff --cached --quiet || git commit -m 'Apply history-aware finance planning'
           git push
