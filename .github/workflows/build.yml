@@ -8,14 +8,58 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build Vite app
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - name: Verify compiled output
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          grep -q "assets/" dist/index.html
+          test ! -f dist/sw.js
+          echo "Compiled Vite output verified without legacy service worker"
+      - name: Verify React entry is compiled
+        run: |
+          grep -q "createRoot" dist/assets/*.js
+          echo "React entrypoint is present in compiled assets"
+      - name: Verify Supabase source fallback
+        run: |
+          grep -q "try" src/lib/supabase.js
+          grep -q "supabase = null" src/lib/supabase.js
+          echo "Defensive Supabase initialization is present in source"
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
