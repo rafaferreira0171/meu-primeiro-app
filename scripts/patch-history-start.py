@@ -14,10 +14,20 @@ new_normalize='''function normalizeData(raw={}){const d={...seed,...raw,fluxo:[.
 '''
 s=s[:start]+new_normalize+s[end:]
 
+old='''function useFinance(){const[data,setData]=useState(()=>normalizeData(loadLocal(seed))),[busy,setBusy]=useState(false),[error,setError]=useState('');useEffect(()=>{setBusy(true);loadData(seed).then(x=>setData(normalizeData(x))).catch(e=>setError(e.message||'Não foi possível carregar os dados.')).finally(()=>setBusy(false))},[]);const save=next=>{const n=normalizeData(next);setData(n);persistData(n).catch(e=>setError(e.message||'Erro ao sincronizar dados.'))};return{data,save,busy,error,setError}}'''
+new='''function useFinance(){const[hasLoaded,setHasLoaded]=useState(false),[data,setData]=useState(()=>hasSupabaseConfig()?normalizeData({}):normalizeData(loadLocal(seed))),[busy,setBusy]=useState(false),[error,setError]=useState('');useEffect(()=>{let active=true;setBusy(true);loadData(seed).then(x=>{if(active){setData(normalizeData(x));setHasLoaded(true)}}).catch(e=>{if(active){setError(e.message||'Não foi possível carregar os dados.');setHasLoaded(true)}}).finally(()=>active&&setBusy(false));return()=>{active=false}},[]);const save=next=>{const n=normalizeData(next);setData(n);persistData(n).catch(e=>setError(e.message||'Erro ao sincronizar dados.'))};return{data,save,busy,error,setError,hasLoaded}}'''
+if old not in s:
+    raise SystemExit('expected useFinance block not found')
+s=s.replace(old,new,1)
+s=s.replace("const{data,save,busy,error,setError}=useFinance(),[tab,setTab]", "const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]", 1)
+s=s.replace("if(session===undefined)return <Splash/>", "if(session===undefined||!hasLoaded)return <Splash/>", 1)
+
 if 'const existingMonths=' not in s or 'd.startMonth=' not in s or 'const historyMonths=' not in s or 'const isDemo=' not in s:
     raise SystemExit('history-aware normalizeData was not applied')
 if 'const baseFluxo={salario:12000' not in s or 'seed={fluxo:MONTHS.map(makeFluxo)' not in s:
     raise SystemExit('demo seed was changed unexpectedly')
+if 'const[hasLoaded,setHasLoaded]=useState(false)' not in s or 'session===undefined||!hasLoaded' not in s:
+    raise SystemExit('authenticated load guard was not applied')
 
 p.write_text(s)
-print('history-aware normalization applied; demo seed preserved; new empty users get zero values')
+print('history-aware normalization applied; demo seed preserved; authenticated users wait for their data before rendering')
