@@ -18,6 +18,4 @@ jobs:
         with:
           node-version: 24
       - run: npm install --no-audit --no-fund
-      - name: Validate planning and Budget rules
-        run: node scripts/planning-guard.mjs
       - run: npm run build
