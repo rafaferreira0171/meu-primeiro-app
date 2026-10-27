@@ -42,6 +42,10 @@ jobs:
         run: |
           grep -q "createRoot" dist/assets/*.js
           echo "React entrypoint is present in compiled assets"
+      - name: Verify Supabase fallback is compiled
+        run: |
+          grep -q "Supabase indisponível" dist/assets/*.js
+          echo "Defensive Supabase initialization is present in compiled assets"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
