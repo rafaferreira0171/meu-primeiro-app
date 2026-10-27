@@ -12,6 +12,8 @@ assert.equal(months.at(-1),addMonths(now,11),'A janela deve terminar 11 meses ap
 assert.match(source,/planningMonths\(now,12\)/,'normalizeData deve usar janela móvel de 12 meses')
 assert.match(source,/x\.month>=next\?\{\.\.\.x,ativo:false\}/,'Encerramento deve desativar somente registros futuros')
 assert.match(source,/m>now/,'A replicação automática deve atingir somente meses futuros')
+assert.match(source,/Prestadores de Serviço/,'O Fluxo deve exibir Prestadores de Serviço, não 50% Prestadores')
+assert.doesNotMatch(source,/label="50% Prestadores"/,'O Fluxo não deve lançar 50% de Prestadores como despesa')
 
 const fluxo={salario:12000,va:700,condominio:1000}
 const prestador={salario:1400,dias_uteis:40,passagem_scs:5,passagem_sp:5.9}
