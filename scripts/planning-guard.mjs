@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import assert from 'node:assert/strict'
-import {currentMonth,planningMonths,addMonths,calcFluxoMonth,calcPixMonth,calcTransfer,totalPrestador} from '../src/lib/finance.js'
+import {currentMonth,planningMonths,addMonths,calcFluxoMonth,calcPixMonth,calcTransfer,totalPrestador,calcBudgetMonth} from '../src/lib/finance.js'
 
 const source=fs.readFileSync(new URL('../src/main.jsx',import.meta.url),'utf8')
 const now=currentMonth()
@@ -14,6 +14,9 @@ assert.match(source,/x\.month>=next\?\{\.\.\.x,ativo:false\}/,'Encerramento deve
 assert.match(source,/m>now/,'A replicação automática deve atingir somente meses futuros')
 assert.match(source,/Prestadores de Serviço/,'O Fluxo deve exibir Prestadores de Serviço, não 50% Prestadores')
 assert.doesNotMatch(source,/label="50% Prestadores"/,'O Fluxo não deve lançar 50% de Prestadores como despesa')
+assert.match(source,/budgetAccounts/,'O modelo deve possuir contas de Budget dinâmicas')
+assert.match(source,/\+ Adicionar conta/,'A UI deve permitir adicionar contas de Budget')
+assert.match(source,/ativo:false/,'A exclusão de Budget deve ser lógica, não destrutiva')
 
 const fluxo={salario:12000,va:700,condominio:1000}
 const prestador={salario:1400,dias_uteis:40,passagem_scs:5,passagem_sp:5.9}
@@ -31,4 +34,16 @@ assert.equal(fm.balance,fm.entries-fm.expenses,'Saldo deve ser entradas menos de
 const transfer=calcTransfer({items:[{type:'fluxo',key:'condominio'},{type:'prestador_half',key:'p1'},{type:'despesa',key:'d1'}]},fluxo,[{...prestador,prestador_id:'p1'}],[{...despesa,id:'d1'}])
 assert.equal(transfer,1000+totalPrestador(prestador)/2+50,'Transferência deve refletir os itens selecionados sem criar nova despesa')
 
-console.log(`Planning guard OK: ${now} → ${months.at(-1)}`)
+const oct=`${now}:va`,nov=addMonths(now,1)
+const va={id:'va-account',month:now,nome:'VA',budget:700,ativo:true}
+const accounts=[{id:'mercado-account',month:now,nome:'Mercado',legacy_key:'mercado',budget:1000,ativo:true},va]
+const gastos=[{id:'g1',month:now,conta:'va',budget_account_id:'va-account',valor:250},{id:'legacy',month:now,conta:'mercado',valor:100}]
+const budget=calcBudgetMonth(gastos,now,accounts)
+assert.equal(budget.find(a=>a.id==='va-account').spent,250,'VA deve controlar seus próprios lançamentos')
+assert.equal(budget.find(a=>a.id==='va-account').balance,450,'Saldo do VA deve ser Budget menos realizado')
+assert.equal(budget.find(a=>a.id==='mercado-account').spent,100,'Lançamento legado deve continuar compatível')
+assert.equal(calcBudgetMonth(gastos,nov,[{id:'va-account',month:nov,nome:'VA',budget:700,ativo:true}]).length,1,'Contas de Budget devem ser independentes por mês')
+assert.equal(gastos.length,2,'Remover uma conta de Budget não pode apagar lançamentos históricos')
+assert.equal(oct.split(':')[1],'va','Teste de conta dinâmica executado')
+
+console.log(`Planning/Budget guard OK: ${now} → ${months.at(-1)}`)
