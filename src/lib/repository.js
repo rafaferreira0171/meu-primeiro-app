@@ -37,10 +37,13 @@ export async function upsertRows(table, rows, userId) {
   return data || []
 }
 
-export async function deleteRowsNotInIds(table, ids, userId) {
+export async function deleteRowsNotInIds(table, ids, userId, options = {}) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
   if (table === 'fluxo' || table === 'empregada') return
-  const { data: existing, error: readError } = await supabase.from(table).select('id').eq('user_id', userId)
+  const { preserveHistory = false, fromMonth = null } = options
+  let query = supabase.from(table).select('id,month').eq('user_id', userId)
+  if (preserveHistory && fromMonth) query = query.gte('month', fromMonth)
+  const { data: existing, error: readError } = await query
   if (readError) throw readError
   const keep = new Set(ids.filter(Boolean))
   const stale = (existing || []).map(row => row.id).filter(id => !keep.has(id))
