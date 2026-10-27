@@ -43,9 +43,10 @@ export async function persistData(data) {
   const session = await getSession()
   if (!session?.user) throw new Error('AUTH_REQUIRED')
   const userId = session.user.id
+  const currentMonth = new Date().toISOString().slice(0, 7)
   saveLocal(data, userId)
   await Promise.all([
-    upsertUserSettings(userId, { start_month: data.startMonth || new Date().toISOString().slice(0, 7) }),
+    upsertUserSettings(userId, { start_month: data.startMonth || currentMonth }),
     upsertRows('fluxo', data.fluxo || [], userId),
     upsertRows('entrada', data.entradas || [], userId),
     upsertRows('prestador', data.prestadores || [], userId),
@@ -54,13 +55,14 @@ export async function persistData(data) {
     upsertRows('transferencia', data.transferencias || [], userId),
     upsertRows('budget_account', data.budgetAccounts || [], userId)
   ])
+  const cleanupOptions = { preserveHistory: true, fromMonth: currentMonth }
   await Promise.all([
-    deleteRowsNotInIds('entrada', (data.entradas || []).map(row => row.id), userId),
-    deleteRowsNotInIds('prestador', (data.prestadores || []).map(row => row.id), userId),
-    deleteRowsNotInIds('despesa', (data.despesas || []).map(row => row.id), userId),
-    deleteRowsNotInIds('gasto', (data.gastos || []).map(row => row.id), userId),
-    deleteRowsNotInIds('transferencia', (data.transferencias || []).map(row => row.id), userId),
-    deleteRowsNotInIds('budget_account', (data.budgetAccounts || []).map(row => row.id), userId)
+    deleteRowsNotInIds('entrada', (data.entradas || []).map(row => row.id), userId, cleanupOptions),
+    deleteRowsNotInIds('prestador', (data.prestadores || []).map(row => row.id), userId, cleanupOptions),
+    deleteRowsNotInIds('despesa', (data.despesas || []).map(row => row.id), userId, cleanupOptions),
+    deleteRowsNotInIds('gasto', (data.gastos || []).map(row => row.id), userId, cleanupOptions),
+    deleteRowsNotInIds('transferencia', (data.transferencias || []).map(row => row.id), userId, cleanupOptions),
+    deleteRowsNotInIds('budget_account', (data.budgetAccounts || []).map(row => row.id), userId, cleanupOptions)
   ])
   return { persisted: true, mode: 'supabase' }
 }
