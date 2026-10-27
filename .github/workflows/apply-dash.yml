@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'scripts/patch-dash-intelligence.py'
+      - 'src/main.jsx'
   workflow_dispatch:
 permissions:
   contents: write
