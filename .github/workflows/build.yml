@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -17,21 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Patch Dash current-month KPI logic
-        run: python3 scripts/patch_dash.py
-      - name: Harden legacy recurring series IDs
-        run: python3 scripts/migrate_series.py
-      - name: Align Prestadores total with Fluxo
-        run: python3 scripts/patch_prestadores_fluxo.py
       - run: npm install --no-audit --no-fund
-      - name: Validate planning and history rules
+      - name: Validate planning and Budget rules
         run: node scripts/planning-guard.mjs
       - run: npm run build
-      - name: Commit source fixes
-        run: |
-          if git diff --quiet -- src/main.jsx src/lib/finance.js; then exit 0; fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/main.jsx src/lib/finance.js
-          git commit -m 'Align Prestadores total with Fluxo'
-          git push
