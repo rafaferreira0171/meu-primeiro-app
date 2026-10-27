@@ -1,6 +1,6 @@
 import { supabase, hasSupabaseConfig } from './supabase'
 
-const tables = ['fluxo','empregada','prestador','entrada','despesa','gasto','transferencia']
+const tables = ['fluxo','empregada','prestador','entrada','despesa','gasto','transferencia','budget_account']
 
 export async function loadFinanceData(userId) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
