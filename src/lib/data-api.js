@@ -1,47 +1,65 @@
 import { hasSupabaseConfig } from './supabase'
 import { getSession } from './auth'
-import { loadFinanceData, upsertRows, deleteRowsNotInIds } from './repository'
+import { loadFinanceData, loadUserSettings, upsertUserSettings, upsertRows, deleteRowsNotInIds } from './repository'
 
 const KEY = 'looklip-finance-data'
-export function saveLocal(data) { localStorage.setItem(KEY, JSON.stringify(data)) }
-export function loadLocal(fallback) {
+const DEMO_KEY = `${KEY}:demo`
+const userKey = userId => `${KEY}:${userId}`
+
+export function saveLocal(data, userId = null) {
+  const key = userId ? userKey(userId) : DEMO_KEY
+  localStorage.setItem(key, JSON.stringify(data))
+}
+
+export function loadLocal(fallback, userId = null) {
   try {
-    const raw = localStorage.getItem(KEY)
+    const key = userId ? userKey(userId) : DEMO_KEY
+    const raw = localStorage.getItem(key)
     if (!raw) return fallback
     const parsed = JSON.parse(raw)
     return { ...fallback, ...parsed, entradas: parsed.entradas || [], prestadores: parsed.prestadores || parsed.empregada || [], transferencias: parsed.transferencias || [], despesas: parsed.despesas || [], gastos: parsed.gastos || [], budgetAccounts: parsed.budgetAccounts || [] }
   } catch { return fallback }
 }
+
 export async function loadData(fallback) {
   if (!hasSupabaseConfig()) return loadLocal(fallback)
   const session = await getSession()
   if (!session?.user) throw new Error('AUTH_REQUIRED')
-  const rows = await loadFinanceData(session.user.id)
-  const data = { ...fallback, fluxo: rows.fluxo || [], entradas: rows.entrada || [], prestadores: rows.prestador || rows.empregada || [], despesas: rows.despesa || [], gastos: rows.gasto || [], transferencias: rows.transferencia || [], budgetAccounts: rows.budget_account || [] }
-  saveLocal(data)
+  const userId = session.user.id
+  const [rows, settings] = await Promise.all([loadFinanceData(userId), loadUserSettings(userId)])
+  const startMonth = settings?.start_month || new Date().toISOString().slice(0, 7)
+  if (!settings) await upsertUserSettings(userId, { start_month: startMonth })
+  const data = { ...fallback, startMonth, fluxo: rows.fluxo || [], entradas: rows.entrada || [], prestadores: rows.prestador || rows.empregada || [], despesas: rows.despesa || [], gastos: rows.gasto || [], transferencias: rows.transferencia || [], budgetAccounts: rows.budget_account || [] }
+  saveLocal(data, userId)
   return data
 }
+
 export async function persistData(data) {
-  saveLocal(data)
-  if (!hasSupabaseConfig()) return { persisted: false, mode: 'local' }
+  if (!hasSupabaseConfig()) {
+    saveLocal(data)
+    return { persisted: false, mode: 'local' }
+  }
   const session = await getSession()
   if (!session?.user) throw new Error('AUTH_REQUIRED')
+  const userId = session.user.id
+  saveLocal(data, userId)
   await Promise.all([
-    upsertRows('fluxo', data.fluxo || [], session.user.id),
-    upsertRows('entrada', data.entradas || [], session.user.id),
-    upsertRows('prestador', data.prestadores || [], session.user.id),
-    upsertRows('despesa', data.despesas || [], session.user.id),
-    upsertRows('gasto', data.gastos || [], session.user.id),
-    upsertRows('transferencia', data.transferencias || [], session.user.id),
-    upsertRows('budget_account', data.budgetAccounts || [], session.user.id)
+    upsertUserSettings(userId, { start_month: data.startMonth || new Date().toISOString().slice(0, 7) }),
+    upsertRows('fluxo', data.fluxo || [], userId),
+    upsertRows('entrada', data.entradas || [], userId),
+    upsertRows('prestador', data.prestadores || [], userId),
+    upsertRows('despesa', data.despesas || [], userId),
+    upsertRows('gasto', data.gastos || [], userId),
+    upsertRows('transferencia', data.transferencias || [], userId),
+    upsertRows('budget_account', data.budgetAccounts || [], userId)
   ])
   await Promise.all([
-    deleteRowsNotInIds('entrada', (data.entradas || []).map(row => row.id), session.user.id),
-    deleteRowsNotInIds('prestador', (data.prestadores || []).map(row => row.id), session.user.id),
-    deleteRowsNotInIds('despesa', (data.despesas || []).map(row => row.id), session.user.id),
-    deleteRowsNotInIds('gasto', (data.gastos || []).map(row => row.id), session.user.id),
-    deleteRowsNotInIds('transferencia', (data.transferencias || []).map(row => row.id), session.user.id),
-    deleteRowsNotInIds('budget_account', (data.budgetAccounts || []).map(row => row.id), session.user.id)
+    deleteRowsNotInIds('entrada', (data.entradas || []).map(row => row.id), userId),
+    deleteRowsNotInIds('prestador', (data.prestadores || []).map(row => row.id), userId),
+    deleteRowsNotInIds('despesa', (data.despesas || []).map(row => row.id), userId),
+    deleteRowsNotInIds('gasto', (data.gastos || []).map(row => row.id), userId),
+    deleteRowsNotInIds('transferencia', (data.transferencias || []).map(row => row.id), userId),
+    deleteRowsNotInIds('budget_account', (data.budgetAccounts || []).map(row => row.id), userId)
   ])
   return { persisted: true, mode: 'supabase' }
 }
