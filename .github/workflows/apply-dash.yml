@@ -1,9 +1,9 @@
 name: Apply LookLiP Dash
 on:
-  workflow_dispatch:
   push:
     paths:
-      - '.github/workflows/apply-dash.yml'
+      - 'scripts/patch-dash-intelligence.py'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
