@@ -36,7 +36,8 @@ jobs:
           test -f dist/index.html
           test -d dist/assets
           grep -q "assets/" dist/index.html
-          echo "Compiled Vite output verified"
+          test ! -f dist/sw.js
+          echo "Compiled Vite output verified without legacy service worker"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
