@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react'
 import {createRoot} from 'react-dom/client'
 import './styles.css'
+import './mobile.css'
 import {MONTHS,currentMonth,planningMonths,addMonths,FLUXO_FIELDS,totalPrestador,calcFluxoMonth,calcTransfer,calcBudgetMonth} from './lib/finance'
 import {hasSupabaseConfig} from './lib/supabase'
 import {signIn,signUp,signOut,getSession,onAuthStateChange} from './lib/auth'
