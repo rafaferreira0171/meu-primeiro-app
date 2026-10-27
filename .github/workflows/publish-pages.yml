@@ -1,9 +1,7 @@
 name: Publish LookLiP Finance
 
-# Force a fresh Pages build after Safari compatibility fixes
+# Pages is published by build.yml on every push. Keep this workflow available only for manual recovery.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
