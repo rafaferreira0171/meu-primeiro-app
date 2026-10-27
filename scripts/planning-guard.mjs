@@ -19,7 +19,9 @@ const extra={nome:'Comissão',valor:1000}
 const despesa={nome:'Streaming',valor:50}
 const fm=calcFluxoMonth(fluxo,[prestador],[despesa],[extra])
 assert.equal(fm.entries,13700,'Entradas devem somar salário, VA e entradas extras')
-assert.equal(fm.employeeHalf,totalPrestador(prestador)/2,'Prestadores devem gerar 50% automático')
+assert.equal(fm.employeeTotal,totalPrestador(prestador),'Prestadores devem alimentar o Fluxo pelo total do card')
+assert.equal(fm.expenses,1000+50+totalPrestador(prestador)+360,'Despesa Prestadores no Fluxo deve usar 100% do total')
+assert.equal(totalPrestador(prestador)/2,918,'50% deve permanecer disponível apenas para divisão/Pix')
 assert.equal(fm.tax,360,'Imposto automático deve permanecer em R$ 360')
 assert.equal(fm.balance,fm.entries-fm.expenses,'Saldo deve ser entradas menos despesas')
 
