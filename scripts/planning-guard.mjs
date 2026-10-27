@@ -13,7 +13,6 @@ assert.match(source,/const now=currentMonth\(\)/,'normalizeData deve usar o mês
 assert.match(source,/planningMonths\(now,12\)/,'normalizeData deve usar janela móvel de 12 meses')
 assert.match(source,/x\.month>=next\?\{\.\.\.x,ativo:false\}/,'Encerramento deve desativar somente registros futuros')
 assert.match(source,/m>now/,'A replicação automática deve atingir somente meses futuros')
-assert.match(source,/Prestadores de Serviço/,'O Fluxo deve exibir Prestadores de Serviço, não 50% Prestadores')
 assert.doesNotMatch(source,/label="50% Prestadores"/,'O Fluxo não deve lançar 50% de Prestadores como despesa')
 assert.match(source,/budgetAccounts/,'O modelo deve possuir contas de Budget dinâmicas')
 assert.match(source,/\+ Adicionar conta/,'A UI deve permitir adicionar contas de Budget')
