@@ -1,5 +1,5 @@
 import { hasSupabaseConfig } from './supabase'
-import { getSession } from './auth'
+import { getSession, ensureStartMonth } from './auth'
 import { loadFinanceData, loadUserSettings, upsertUserSettings, upsertRows, deleteRowsNotInIds } from './repository'
 
 const KEY = 'looklip-finance-data'
@@ -27,7 +27,8 @@ export async function loadData(fallback) {
   if (!session?.user) throw new Error('AUTH_REQUIRED')
   const userId = session.user.id
   const [rows, settings] = await Promise.all([loadFinanceData(userId), loadUserSettings(userId)])
-  const startMonth = settings?.start_month || new Date().toISOString().slice(0, 7)
+  const fallbackMonth = new Date().toISOString().slice(0, 7)
+  const startMonth = settings?.start_month || await ensureStartMonth(session, fallbackMonth)
   if (!settings) await upsertUserSettings(userId, { start_month: startMonth })
   const data = { ...fallback, startMonth, fluxo: rows.fluxo || [], entradas: rows.entrada || [], prestadores: rows.prestador || rows.empregada || [], despesas: rows.despesa || [], gastos: rows.gasto || [], transferencias: rows.transferencia || [], budgetAccounts: rows.budget_account || [] }
   saveLocal(data, userId)
