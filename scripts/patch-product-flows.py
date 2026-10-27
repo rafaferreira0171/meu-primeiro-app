@@ -1,51 +1,14 @@
 from pathlib import Path
+import re
 
-# Main UI patch
 path = Path('src/main.jsx')
 s = path.read_text(encoding='utf-8')
-main_replacements = [
-    (
-        "{tab==='prestadores'&&<Prestadores data={data} save={save} month={month}/>}",
-        "{tab==='prestadores'&&<Prestadores data={data} save={save} month={month} setMonth={setMonth}/>}",
-    ),
-    (
-        "function Prestadores({data,save,month}){",
-        "function Prestadores({data,save,month,setMonth}){",
-    ),
-    (
-        "passagem_scs:Number(scs)||0,passagem_sp:Number(sp)||0,ativo:true",
-        "passagem_scs:Number(scs)||0,passagem_sp:Number(sp)||0,fluxo_percentual:50,ativo:true",
-    ),
-    (
-        "{list.map(p=><div className=\"provider-row\" key={p.id}><div><b>{p.nome}</b><small>{p.dias_uteis} dias · {BRL(totalPrestador(p))}</small></div><strong>{BRL(totalPrestador(p))}</strong></div>)}",
-        "{list.map(p=>{const total=totalPrestador(p),percent=Math.max(0,Math.min(100,Number(p.fluxo_percentual??50)));return <div className=\"provider-row\" key={p.id}><div><b>{p.nome}</b><small>{p.dias_uteis} dias · {BRL(total)}</small></div><div className=\"provider-total\"><label><span>% Fluxo</span><input inputMode=\"numeric\" type=\"number\" min=\"0\" max=\"100\" step=\"1\" value={percent} onChange={e=>save({...data,prestadores:data.prestadores.map(x=>x.id===p.id?{...x,fluxo_percentual:Math.max(0,Math.min(100,Number(e.target.value)||0))}:x)})}/></label><strong>{BRL(total*percent/100)}</strong><small>{BRL(total)} total</small></div></div>})}",
-    ),
-]
-for old, new in main_replacements:
-    if old in s:
-        s = s.replace(old, new, 1)
-path.write_text(s, encoding='utf-8')
-
-# Finance calculation patch
-path = Path('src/lib/finance.js')
-s = path.read_text(encoding='utf-8')
-finance_replacements = [
-    (
-        "export function totalPrestadores(list=[]){return list.reduce((s,p)=>s+totalPrestador(p),0)}",
-        "export function fluxoPercentual(p){return Math.max(0,Math.min(100,Number(p?.fluxo_percentual??50)))}\nexport function totalPrestadorFluxo(p){return totalPrestador(p)*fluxoPercentual(p)/100}\nexport function totalPrestadores(list=[]){return list.reduce((s,p)=>s+totalPrestador(p),0)}\nexport function totalPrestadoresFluxo(list=[]){return list.reduce((s,p)=>s+totalPrestadorFluxo(p),0)}",
-    ),
-    (
-        "const employeeTotal=totalPrestadores(prestadores);",
-        "const employeeTotal=totalPrestadoresFluxo(prestadores);",
-    ),
-    (
-        "if(item.type==='prestador_half'){const p=prestadores.find(x=>(x.prestador_id||x.id)===item.key);return totalPrestador(p)/2}",
-        "if(item.type==='prestador_half'||item.type==='prestador_fluxo'){const p=prestadores.find(x=>(x.prestador_id||x.id)===item.key);return totalPrestadorFluxo(p)}",
-    ),
-]
-for old, new in finance_replacements:
-    if old not in s:
-        raise SystemExit(f'finance pattern not found: {old[:100]}')
-    s = s.replace(old, new, 1)
-path.write_text(s, encoding='utf-8')
-print('patched provider Flow percentage')
+s = s.replace("{tab==='prestadores'&&<Prestadores data={data} save={save} month={month}/>}","{tab==='prestadores'&&<Prestadores data={data} save={save} month={month} setMonth={setMonth}/>}",1)
+provider='''function Prestadores({data,save,month,setMonth}){const list=data.prestadores.filter(x=>x.month===month&&x.ativo!==false),{modal,setModal,close}=useModal();const add=(nome,salario,dias,scs,sp,fluxoPercent)=>{const id=crypto.randomUUID();const months=planningMonths(month,13);const pct=Math.max(0,Math.min(100,Number(fluxoPercent)||50));const rows=months.map(m=>({id:crypto.randomUUID(),prestador_id:id,month:m,nome,salario:Number(salario)||0,dias_uteis:Number(dias)||0,passagem_scs:Number(scs)||0,passagem_sp:Number(sp)||0,fluxo_percent:pct,ativo:true}));save({...data,prestadores:[...data.prestadores,...rows]});close()};const updatePercent=(p,value)=>{const pct=Math.max(0,Math.min(100,Number(value)||0));save({...data,prestadores:data.prestadores.map(x=>x.prestador_id===p.prestador_id&&x.month>=month?{...x,fluxo_percent:pct}:x)});};return <><div className="toolbar"><MonthSelect month={month} setMonth={setMonth} months={data.fluxo.map(x=>x.month)}/><button className="primary" onClick={()=>setModal({type:'prestador'})}>+ Prestador</button></div><Section title="Prestadores de Serviço">{list.length===0&&<p className="empty">Nenhum prestador neste mês.</p>}{list.map(p=>{const total=totalPrestador(p),pct=Number(p.fluxo_percent??50),toFluxo=total*pct/100;return <div className="provider-row" key={p.id}><div><b>{p.nome}</b><small>{p.dias_uteis} dias · Total {BRL(total)}</small></div><div className="provider-flow"><label><span>% Fluxo</span><input type="number" min="0" max="100" step="1" value={pct} onChange={e=>updatePercent(p,e.target.value)}/></label><div><small>Vai para Fluxo</small><strong>{BRL(toFluxo)}</strong></div></div></div>})}</Section>{modal&&<PrestadorModal onClose={close} onSave={add}/>}</>}'''
+modal='''function PrestadorModal({onClose,onSave}){const[nome,setNome]=useState(''),[salario,setSalario]=useState(''),[dias,setDias]=useState(''),[scs,setScs]=useState(''),[sp,setSp]=useState(''),[fluxoPercent,setFluxoPercent]=useState('50');return <Modal title="Novo prestador" onClose={onClose} onSave={()=>nome.trim()&&onSave(nome.trim(),salario,dias,scs,sp,fluxoPercent)}><FormField label="Nome"><input autoFocus value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex.: Maria"/></FormField><div className="form-grid"><FormField label="Salário"><input inputMode="decimal" type="number" min="0" step="0.01" value={salario} onChange={e=>setSalario(e.target.value)}/></FormField><FormField label="Dias úteis"><input inputMode="numeric" type="number" min="0" value={dias} onChange={e=>setDias(e.target.value)}/></FormField><FormField label="Passagem SCS"><input inputMode="decimal" type="number" min="0" step="0.01" value={scs} onChange={e=>setScs(e.target.value)}/></FormField><FormField label="Passagem SP"><input inputMode="decimal" type="number" min="0" step="0.01" value={sp} onChange={e=>setSp(e.target.value)}/></FormField><FormField label="% direcionado ao Fluxo"><input inputMode="numeric" type="number" min="0" max="100" step="1" value={fluxoPercent} onChange={e=>setFluxoPercent(e.target.value)}/></FormField></div><p className="helper">O padrão é 50%. Você pode alterar por prestador.</p></Modal>}'''
+s,n=re.subn(r"function Prestadores\(.*?(?=function PrestadorModal)",provider+"\n",s,count=1,flags=re.S)
+if n!=1: raise SystemExit('Prestadores function not found')
+s,n=re.subn(r"function PrestadorModal\(.*?(?=function Transferencias)",modal+"\n",s,count=1,flags=re.S)
+if n!=1: raise SystemExit('PrestadorModal function not found')
+path.write_text(s,encoding='utf-8')
+print('patched provider Flow percentage UI')
