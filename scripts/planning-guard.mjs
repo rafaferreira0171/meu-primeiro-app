@@ -17,7 +17,7 @@ assert.match(source,/m>now/,'A replicação automática deve atingir somente mes
 assert.doesNotMatch(source,/label="50% Prestadores"/,'O Fluxo não deve lançar 50% de Prestadores como despesa')
 assert.match(financeSource,/fluxo_percent/,'A regra de percentual individual direcionado ao Fluxo deve existir no motor financeiro')
 assert.match(source,/budgetAccounts/,'O modelo deve possuir contas de Budget dinâmicas')
-assert.match(source,/\+ Adicionar conta/,'A UI deve permitir adicionar contas de Budget')
+assert.match(source,/\+ Conta/,'A UI deve permitir adicionar contas de Budget')
 assert.match(source,/ativo:false/,'A exclusão de Budget deve ser lógica, não destrutiva')
 
 const fluxo={salario:12000,va:700,condominio:1000}
