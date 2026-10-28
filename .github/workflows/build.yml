@@ -39,6 +39,8 @@ jobs:
         run: python scripts/patch-visual-layout.py
       - name: Apply current month across all tabs
         run: python scripts/patch-current-month-all-tabs.py
+      - name: Apply provider future-month edit propagation
+        run: python scripts/patch-provider-future-edits.py
       - name: Apply future-month recurrence rules
         run: python scripts/patch-recurring-future-rules.py
       - name: Validate restored Finance JSX
