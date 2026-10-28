@@ -45,6 +45,8 @@ jobs:
         run: python scripts/patch-dashboard-kpi.py
       - name: Apply dashboard action priorities
         run: python scripts/patch-dashboard-actions.py
+      - name: Apply Finance assistant
+        run: python scripts/patch-finance-assistant.py
       - name: Apply current month across all tabs
         run: python scripts/patch-current-month-all-tabs.py
       - name: Apply provider future-month edit propagation
@@ -101,8 +103,11 @@ jobs:
           grep -q "Utilização" dist/assets/*.js
           grep -q "Prioridades de ação" dist/assets/*.js
           grep -q "Proteger o caixa agora" dist/assets/*.js
+          grep -q "Assistente do seu dinheiro" dist/assets/*.js
+          grep -q "Interpretar lançamento" dist/assets/*.js
+          grep -q "SpeechRecognition" dist/assets/*.js
           grep -q "future-month" src/main.jsx
-          echo "Enhanced Finance UI with recurrence, current-month behavior, dashboard insights, and action priorities is present"
+          echo "Enhanced Finance UI with recurrence, dashboard insights, action priorities, and Finance assistant is present"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
