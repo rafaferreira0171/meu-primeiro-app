@@ -27,6 +27,12 @@ jobs:
         run: python scripts/patch-prestadores-percent.py
       - name: Apply editable tax field
         run: python scripts/patch-imposto-editavel.py
+      - name: Apply transfer provider option
+        run: python scripts/patch-transferencias-prestadores.py
+      - name: Apply Budget account deletion
+        run: python scripts/patch-budget-default-delete.py
+      - name: Apply mobile layout refinement
+        run: python scripts/patch-mobile-layout.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
@@ -67,6 +73,8 @@ jobs:
           grep -q "Disponível" dist/assets/*.js
           grep -q "Evolução do saldo" dist/assets/*.js
           grep -q "Imposto é editável" dist/assets/*.js
+          grep -q "Prestadores de Serviço" dist/assets/*.js
+          grep -q "Excluir" dist/assets/*.js
           echo "Enhanced Finance UI is present in compiled assets"
       - name: Verify Supabase source fallback
         run: |
