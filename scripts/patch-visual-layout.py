@@ -39,6 +39,6 @@ css = r'''
   nav button{min-height:54px;font-size:9px;padding:6px 2px;gap:4px}
 }
 '''
-if '/* LookLiP Finance visual hierarchy */' not in css:
+if '/* LookLiP Finance visual hierarchy */' not in m.read_text():
     m.write_text(m.read_text()+css)
 print('Fluxo semantic cards and refined mobile tab bar applied')
