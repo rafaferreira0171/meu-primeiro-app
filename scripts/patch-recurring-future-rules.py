@@ -4,8 +4,6 @@ import re
 p = Path('src/main.jsx')
 s = p.read_text()
 
-# Recurrence: a record created in a future month must propagate from that
-# month forward, while preserving any month-specific edits already present.
 pattern = r"const ensure=\(rows,key\)=>\{.*?\};ensure\(d\.entradas,'series_id'\);"
 match = re.search(pattern, s)
 if not match:
@@ -14,15 +12,11 @@ if not match:
 new_ensure = "const ensure=(rows,key)=>{const groups=new Map();rows.forEach(r=>{const sid=r[key]||r.id;if(!groups.has(sid))groups.set(sid,[]);groups.get(sid).push(r)});for(const[sid,g]of groups){const cur=g.find(x=>x.month===now)||g.filter(x=>x.month<now).sort((a,b)=>b.month.localeCompare(a.month))[0]||g.filter(x=>x.month>now).sort((a,b)=>a.month.localeCompare(b.month))[0];if(!cur||cur.ativo===false)continue;for(const m of months)if(m>cur.month&&!rows.some(x=>(x[key]||x.id)===sid&&x.month===m))rows.push({...cur,id:crypto.randomUUID(),[key]:sid,month:m,ativo:true)}}};ensure(d.entradas,'series_id');"
 s = s[:match.start()] + new_ensure + s[match.end():]
 
-# Keep recurring transfer expense references stable across monthly copies.
 old = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.id}`,label:x.nome,value:Number(x.valor||0)}))"
 new = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.series_id||x.id}`,label:x.nome,value:Number(x.valor||0)}))"
 if old in s:
     s = s.replace(old, new, 1)
 
-# Repair the legacy malformed Row callback emitted by restore-components.py.
-# Keep this normalization here because this patch runs after every component
-# restoration and before the Vite build.
 for bad, good in {
     'onChange={v=>updateFlux({[k]:v})/>': 'onChange={v=>updateFlux({[k]:v})}/>',
     'onChange={v=>updateFlux({[k]:v)/>': 'onChange={v=>updateFlux({[k]:v})}/>',
@@ -32,3 +26,6 @@ for bad, good in {
 
 p.write_text(s)
 print('Future-month recurrence, stable transfer references and JSX normalization applied')
+lines=s.splitlines()
+for n in range(4045,4140):
+    if n<=len(lines): print(f'JSXLINE {n}: {lines[n-1]}')
