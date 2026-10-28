@@ -37,6 +37,8 @@ jobs:
         run: python scripts/patch-mobile-layout.py
       - name: Apply refined visual hierarchy
         run: python scripts/patch-visual-layout.py
+      - name: Apply current month across all tabs
+        run: python scripts/patch-current-month-all-tabs.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
