@@ -2,11 +2,20 @@ from pathlib import Path
 
 p = Path('src/main.jsx')
 s = p.read_text()
-old = "function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null);useEffect(()=>{let active=true;"
-new = "function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null);useEffect(()=>{setMonth(currentMonth())},[tab]);useEffect(()=>{let active=true;"
-if old not in s:
-    raise SystemExit('App month initialization pattern not found')
-s = s.replace(old, new, 1)
+
+# Onboarding adds showOnboarding to the App hook declaration. Match the
+# post-onboarding shape first, with a fallback for the pre-onboarding shape.
+old_app = "function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null),[showOnboarding,setShowOnboarding]=useState(false);"
+new_app = old_app + "useEffect(()=>{setMonth(currentMonth())},[tab]);"
+
+if "useEffect(()=>{setMonth(currentMonth())},[tab]);" not in s:
+    if old_app in s:
+        s = s.replace(old_app, new_app, 1)
+    else:
+        old_app_legacy = "function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null);"
+        if old_app_legacy not in s:
+            raise SystemExit('App month initialization pattern not found')
+        s = s.replace(old_app_legacy, old_app_legacy + "useEffect(()=>{setMonth(currentMonth())},[tab]);", 1)
 
 # The first render can race with Supabase session restoration. Load the finance
 # data only after the auth session is known, so AUTH_REQUIRED is never shown
