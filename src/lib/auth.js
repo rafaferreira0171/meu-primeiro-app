@@ -1,5 +1,10 @@
 import { supabase, hasSupabaseConfig } from './supabase'
 
+function appRedirectUrl() {
+  if (typeof window === 'undefined') return undefined
+  return `${window.location.origin}${window.location.pathname}`
+}
+
 export async function signIn(email, password) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
   return supabase.auth.signInWithPassword({ email, password })
@@ -7,7 +12,12 @@ export async function signIn(email, password) {
 
 export async function signUp(email, password) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
-  return supabase.auth.signUp({ email, password })
+  const emailRedirectTo = appRedirectUrl()
+  return supabase.auth.signUp({
+    email,
+    password,
+    options: emailRedirectTo ? { emailRedirectTo } : undefined,
+  })
 }
 
 export async function signOut() {
