@@ -25,8 +25,8 @@ jobs:
         run: python scripts/restore-components.py
       - name: Apply provider Fluxo percentage control
         run: python scripts/patch-prestadores-percent.py
-      - name: Apply provider styles
-        run: python scripts/patch-provider-styles.py
+      - name: Apply editable tax field
+        run: python scripts/patch-imposto-editavel.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
@@ -66,6 +66,7 @@ jobs:
           grep -q "Valor calculado" dist/assets/*.js
           grep -q "Disponível" dist/assets/*.js
           grep -q "Evolução do saldo" dist/assets/*.js
+          grep -q "Imposto é editável" dist/assets/*.js
           echo "Enhanced Finance UI is present in compiled assets"
       - name: Verify Supabase source fallback
         run: |
