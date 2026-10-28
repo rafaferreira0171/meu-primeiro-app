@@ -9,6 +9,11 @@ s = s.replace('<div className="total">Total <b>{BRL(fm.entries)}</b></div>\n    
 s = s.replace('<Section title="Despesas">', '<div className="fluxo-card fluxo-expenses"><Section title="Despesas">', 1)
 s = s.replace('<button className="secondary" onClick={()=>{const n=prompt(\'Nome da nova despesa\');if(n){const v=prompt(\'Valor mensal\');if(v!==null)addSeries(\'despesas\',n,v)}}}>+ Nova conta</button>\n      </Section>', '<button className="secondary" onClick={()=>{const n=prompt(\'Nome da nova despesa\');if(n){const v=prompt(\'Valor mensal\');if(v!==null)addSeries(\'despesas\',n,v)}}}>+ Nova conta</button>\n      </Section></div>', 1)
 
+# Compact, premium bottom navigation labels for small screens.
+old_nav = "<nav>{[['fluxo','↔','Fluxo'],['prestadores','●','Prestadores'],['transferencias','▣','Transferências'],['budget','◫','Entradas x Budget'],['dash','◈','LookLiP Dash']].map(([k,i,l])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}>{i} {l}</button>)}</nav>"
+new_nav = "<nav aria-label=\"Navegação principal\">{[['fluxo','↔','Fluxo'],['prestadores','●','Prestadores'],['transferencias','▣','Transf.'],['budget','◫','Budget'],['dash','◈','Dash']].map(([k,i,l])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}><span className=\"nav-icon\">{i}</span><span className=\"nav-label\">{l}</span></button>)}</nav>"
+s = s.replace(old_nav, new_nav, 1)
+
 p.write_text(s)
 
 m = Path('src/mobile.css')
@@ -30,6 +35,8 @@ css = r'''
   nav button:hover{background:#f7f9fc!important;color:var(--ink)!important}
   nav button.active{background:#eef3ff!important;color:var(--blue)!important;box-shadow:inset 0 0 0 1px rgba(57,114,232,.06)!important}
   nav button.active:after{content:'';position:absolute!important;bottom:3px!important;left:50%!important;width:20px!important;height:3px!important;border-radius:999px!important;background:var(--blue)!important;transform:translateX(-50%)!important}
+  nav .nav-icon{display:block!important;font-size:16px!important;line-height:16px!important;margin-bottom:3px!important}
+  nav .nav-label{display:block!important;font-size:9px!important;line-height:12px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%!important}
   main{padding-bottom:112px}
 }
 @media(max-width:520px){
