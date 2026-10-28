@@ -49,11 +49,13 @@ jobs:
           from pathlib import Path
           p = Path('src/main.jsx')
           s = p.read_text()
-          bad = 'onChange={v=>updateFlux({[k]:v)/>'
-          good = 'onChange={v=>updateFlux({[k]:v})}/>'
-          if bad in s:
+          replacements = {
+              'onChange={v=>updateFlux({[k]:v)/>': 'onChange={v=>updateFlux({[k]:v})}/>',
+              'onChange={v=>updateFlux({[k]:v})/>': 'onChange={v=>updateFlux({[k]:v})}/>',
+          }
+          for bad, good in replacements.items():
               s = s.replace(bad, good)
-              p.write_text(s)
+          p.write_text(s)
           print('Finance JSX normalization complete')
           PY
       - name: Setup Node
