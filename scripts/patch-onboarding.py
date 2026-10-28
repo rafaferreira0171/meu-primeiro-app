@@ -11,7 +11,7 @@ if 'function Onboarding({' not in s:
     s=s.replace(marker,component+marker,1)
 
 old="if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;const updateFlux="
-new="if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;const onboardingKey=session?.user?.id?`looklip-onboarding:${session.user.id}`:'looklip-onboarding';const [showOnboarding,setShowOnboarding]=useState(()=>{try{return localStorage.getItem(onboardingKey)!=='1'}catch{return true}});const finishOnboarding=()=>{try{localStorage.setItem(onboardingKey,'1')}catch{};setShowOnboarding(false)};if(showOnboarding)return <><div className="app" style={{visibility:'hidden'}}></div><Onboarding onStart={finishOnboarding}/></>;const updateFlux="
+new='''if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;const onboardingKey=session?.user?.id?`looklip-onboarding:${session.user.id}`:"looklip-onboarding";const [showOnboarding,setShowOnboarding]=useState(()=>{try{return localStorage.getItem(onboardingKey)!=='1'}catch{return true}});const finishOnboarding=()=>{try{localStorage.setItem(onboardingKey,'1')}catch{};setShowOnboarding(false)};if(showOnboarding)return <><div className="app" style={{visibility:'hidden'}}></div><Onboarding onStart={finishOnboarding}/></>;const updateFlux='''
 if old not in s: raise SystemExit('App insertion marker not found')
 s=s.replace(old,new,1)
 p.write_text(s)
