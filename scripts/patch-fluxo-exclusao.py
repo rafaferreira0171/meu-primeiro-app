@@ -5,12 +5,13 @@ p = Path('src/main.jsx')
 s = p.read_text()
 
 # Keep deletion scoped to the selected month. A fixed Fluxo field is physically
-# removed from that month's object; recurring months are untouched.
+# removed from that month's object and recorded as deleted so migration defaults
+# do not resurrect it on the next save.
 if 'function effectiveFluxo(' not in s:
     s = 'function effectiveFluxo(f){return f||{}}\n' + s
 
 old = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});"
-new = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(x.month!==month)return x;const y={...x,...p};for(const k of (p.__delete||[]))delete y[k];delete y.__delete;return y})});"
+new = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(x.month!==month)return x;const y={...x,...p};const deleted=new Set(y.__deletedFields||[]);for(const k of (p.__delete||[])){delete y[k];deleted.add(k)}y.__deletedFields=[...deleted];delete y.__delete;return y})});"
 if old in s:
     s = s.replace(old, new, 1)
 
