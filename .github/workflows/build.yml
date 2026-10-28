@@ -29,6 +29,8 @@ jobs:
         run: python scripts/patch-imposto-editavel.py
       - name: Apply transfer provider option
         run: python scripts/patch-transferencias-prestadores.py
+      - name: Apply canonical month selectors
+        run: python scripts/patch-month-selectors.py
       - name: Apply Budget account deletion
         run: python scripts/patch-budget-default-delete.py
       - name: Apply month-only Fluxo expense exclusion
