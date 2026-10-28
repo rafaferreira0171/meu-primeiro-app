@@ -35,6 +35,24 @@ new = "</main><FinanceAssistant data={data} save={save} month={month}/>{confirm&
 if old not in s:
     raise SystemExit('App insertion point not found')
 s = s.replace(old, new, 1)
+
+# Voice UX: spoken Portuguese numbers, guaranteed stop after a result, and a clean new session.
+s = s.replace("import React,{useEffect,useState} from 'react'", "import React,{useEffect,useState} from 'react'")
+old_parse = "const parseValue=v=>{const n=String(v||'').replace(/r\\$\\s*/ig,'').replace(/\\./g,'').replace(',','.').match(/\\d+(?:\\.\\d+)?/);return n?Number(n[0]):0};"
+new_parse = r'''const parseValue=v=>{const raw=normalize(v).replace(/r\$\s*/g,'').replace(/ reais?/g,' ').trim();const n=raw.replace(/\./g,'').replace(',','.').match(/\d+(?:\.\d+)?/);if(n)return Number(n[0]);const ones={zero:0,um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,onze:11,doze:12,treze:13,quatorze:14,catorze:14,quinze:15,dezesseis:16,dezessete:17,dezoito:18,dezenove:19};const tens={vinte:20,trinta:30,quarenta:40,cinquenta:50,sessenta:60,setenta:70,oitenta:80,noventa:90};const words=raw.replace(/\be\b/g,' ').split(/\s+/).filter(Boolean);let total=0;for(const w of words){if(Object.prototype.hasOwnProperty.call(ones,w)){total+=ones[w];continue}if(Object.prototype.hasOwnProperty.call(tens,w)){total+=tens[w];continue}if(w==='cem'||w==='cento'){total+=100;continue}if(w==='duzentos'||w==='duzentas'){total+=200;continue}if(w==='trezentos'||w==='trezentas'){total+=300;continue}if(w==='quatrocentos'||w==='quatrocentas'){total+=400;continue}if(w==='quinhentos'){total+=500;continue}if(w==='seiscentos'||w==='seiscentas'){total+=600;continue}if(w==='setecentos'||w==='setecentas'){total+=700;continue}if(w==='oitocentos'||w==='oitocentas'){total+=800;continue}if(w==='novecentos'||w==='novecentas'){total+=900;continue}}return total};'''
+if old_parse in s:
+    s = s.replace(old_parse,new_parse,1)
+
+old_voice = r'''const startVoice=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setMessage('Seu navegador não disponibilizou reconhecimento de voz. Use o campo de texto ou o ditado do teclado.');return}const r=new SR();r.lang='pt-BR';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>setListening(true);r.onend=()=>setListening(false);r.onerror=()=>{setListening(false);setMessage('Não consegui ouvir. Tente novamente.')};r.onresult=e=>{const heard=e.results?.[0]?.[0]?.transcript||'';setText(heard);setTimeout(()=>{const d=parse(heard);if(d?.account){setDraft(d);setMessage('Confira o lançamento antes de confirmar.')}else if(d){setDraft(d);setMessage('Identifiquei o valor, mas não encontrei o Budget. Escolha uma conta abaixo.')}} ,0)};r.start()};'''
+new_voice = r'''const startVoice=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setMessage('Seu navegador não disponibilizou reconhecimento de voz. Use o campo de texto ou o ditado do teclado.');return}setMessage('');setListening(true);const r=new SR();r.lang='pt-BR';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;let finished=false;const finish=heard=>{if(finished)return;finished=true;try{r.stop()}catch(e){}setListening(false);if(!heard){setMessage('Não consegui ouvir. Tente novamente.');return}setText(heard);const d=parse(heard);if(d?.account){setDraft(d);setMessage('Confira o lançamento antes de confirmar.')}else if(d){setDraft(d);setMessage('Identifiquei o valor, mas não encontrei o Budget. Escolha uma conta abaixo.')}else{setMessage('Não identifiquei o valor. Tente dizer, por exemplo, “cinco reais gasolina”.')}};r.onstart=()=>setListening(true);r.onend=()=>{if(!finished)setListening(false)};r.onerror=e=>{finished=true;setListening(false);if(e?.error!=='aborted')setMessage('Não consegui ouvir. Tente novamente.')};r.onresult=e=>{const heard=e.results?.[0]?.[0]?.transcript||'';finish(heard)};try{r.start()}catch(e){setListening(false);setMessage('Não consegui iniciar o microfone. Tente novamente.')}};'''
+if old_voice in s:
+    s = s.replace(old_voice,new_voice,1)
+
+old_open = "onClick={()=>{setOpen(true);setMessage('');startVoice()}} aria-label=\"Abrir Finance\""
+new_open = "onClick={()=>{setOpen(true);setText('');setDraft(null);setMessage('');startVoice()}} aria-label=\"Abrir Finance\""
+if old_open in s:
+    s = s.replace(old_open,new_open,1)
+
 p.write_text(s)
 
 css = Path('src/styles.css')
