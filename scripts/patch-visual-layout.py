@@ -24,12 +24,13 @@ css = r'''
 .fluxo-expenses>.card .note{background:#fff1d9}
 
 @media(max-width:800px){
-  nav{background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(15,22,35,.08);padding:6px;gap:3px;border-radius:20px;box-shadow:0 14px 38px rgba(15,22,35,.18)}
+  nav{position:fixed!important;left:12px;right:12px;bottom:max(8px,env(safe-area-inset-bottom));top:auto!important;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(15,22,35,.08);padding:6px;gap:3px;border-radius:20px;box-shadow:0 14px 38px rgba(15,22,35,.18);margin:0}
   nav button{position:relative;color:#7a8391;border-radius:14px;font-weight:700;transition:background .18s ease,color .18s ease,transform .18s ease}
   nav button:active{transform:scale(.96)}
   nav button.active{background:#eef3ff;color:var(--blue);box-shadow:none}
   nav button.active:after{content:'';position:absolute;bottom:3px;left:50%;width:18px;height:3px;border-radius:999px;background:var(--blue);transform:translateX(-50%)}
   nav button:first-letter{font-size:17px}
+  main{padding-bottom:112px}
 }
 @media(max-width:520px){
   .fluxo-card>.card{margin-bottom:10px!important}
@@ -41,4 +42,10 @@ css = r'''
 '''
 if '/* LookLiP Finance visual hierarchy */' not in m.read_text():
     m.write_text(m.read_text()+css)
-print('Fluxo semantic cards and refined mobile tab bar applied')
+else:
+    # Update the existing visual block so the navigation uses the intended bottom-bar layout.
+    import re
+    text = m.read_text()
+    text = re.sub(r'/\* LookLiP Finance visual hierarchy \*/.*', css.strip()+"\n", text, flags=re.S)
+    m.write_text(text)
+print('Fluxo semantic cards and refined bottom navigation applied')
