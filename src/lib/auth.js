@@ -1,8 +1,9 @@
 import { supabase, hasSupabaseConfig } from './supabase'
 
+const APP_URL = 'https://rafaferreira0171.github.io/meu-primeiro-app/'
+
 function appRedirectUrl() {
-  if (typeof window === 'undefined') return undefined
-  return `${window.location.origin}${window.location.pathname}`
+  return APP_URL
 }
 
 export async function signIn(email, password) {
