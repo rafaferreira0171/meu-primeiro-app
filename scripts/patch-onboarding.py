@@ -10,9 +10,15 @@ if 'function Onboarding({' not in s:
     if marker not in s: raise SystemExit('Splash marker not found')
     s=s.replace(marker,component+marker,1)
 
-old="if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;const updateFlux="
-new='''if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;const onboardingKey=session?.user?.id?`looklip-onboarding:${session.user.id}`:"looklip-onboarding";const [showOnboarding,setShowOnboarding]=useState(()=>{try{return localStorage.getItem(onboardingKey)!=='1'}catch{return true}});const finishOnboarding=()=>{try{localStorage.setItem(onboardingKey,'1')}catch{};setShowOnboarding(false)};if(showOnboarding)return <><div className="app" style={{visibility:'hidden'}}></div><Onboarding onStart={finishOnboarding}/></>;const updateFlux='''
-if old not in s: raise SystemExit('App insertion marker not found')
+old='''function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null);useEffect(()=>{let active=true;getSession().then(s=>{if(active)setSession(s)}).catch(()=>{if(active)setSession(null)});const s=onAuthStateChange(setSession);return()=>{active=false;s.data.subscription.unsubscribe()}},[]);if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;'''
+new='''function App(){const{data,save,busy,error,setError,hasLoaded}=useFinance(),[tab,setTab]=useState('fluxo'),[month,setMonth]=useState(currentMonth()),[session,setSession]=useState(undefined),[confirm,setConfirm]=useState(null),[showOnboarding,setShowOnboarding]=useState(false);const onboardingKey=session?.user?.id?`looklip-onboarding:${session.user.id}`:"looklip-onboarding";useEffect(()=>{let active=true;getSession().then(s=>{if(active)setSession(s)}).catch(()=>{if(active)setSession(null)});const s=onAuthStateChange(setSession);return()=>{active=false;s.data.subscription.unsubscribe()}},[]);useEffect(()=>{if(!session)return;try{setShowOnboarding(localStorage.getItem(`looklip-onboarding:${session.user.id}`)!=='1')}catch{setShowOnboarding(true)}},[session?.user?.id]);if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;'''
+if old not in s: raise SystemExit('App hook insertion marker not found')
 s=s.replace(old,new,1)
+
+old2='''const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});'''
+new2='''const finishOnboarding=()=>{try{localStorage.setItem(onboardingKey,'1')}catch{};setShowOnboarding(false)};if(showOnboarding)return <><div className="app" style={{visibility:'hidden'}}></div><Onboarding onStart={finishOnboarding}/></>;const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});'''
+if old2 not in s: raise SystemExit('Onboarding render marker not found')
+s=s.replace(old2,new2,1)
+
 p.write_text(s)
-print('Onboarding applied')
+print('Onboarding applied with hooks before early returns')
