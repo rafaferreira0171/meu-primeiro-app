@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Restore missing Finance components
+        run: python scripts/restore-components.py
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -42,7 +44,8 @@ jobs:
       - name: Verify React entry is compiled
         run: |
           grep -q "createRoot" dist/assets/*.js
-          echo "React entrypoint is present in compiled assets"
+          grep -q "Fluxo" dist/assets/*.js
+          echo "React entrypoint and Finance components are present in compiled assets"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
