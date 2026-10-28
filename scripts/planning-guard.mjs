@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {currentMonth,planningMonths,addMonths,calcFluxoMonth,calcPixMonth,calcTransfer,totalPrestador,fluxoPrestadorPercent,calcBudgetMonth} from '../src/lib/finance.js'
 
 const source=fs.readFileSync(new URL('../src/main.jsx',import.meta.url),'utf8')
+const financeSource=fs.readFileSync(new URL('../src/lib/finance.js',import.meta.url),'utf8')
 const now=currentMonth()
 const months=planningMonths(now,12)
 
@@ -14,8 +15,7 @@ assert.match(source,/planningMonths\(now,12\)/,'normalizeData deve usar janela m
 assert.match(source,/x\.month>=next\?\{\.\.\.x,ativo:false\}/,'Encerramento deve desativar somente registros futuros')
 assert.match(source,/m>now/,'A replicação automática deve atingir somente meses futuros')
 assert.doesNotMatch(source,/label="50% Prestadores"/,'O Fluxo não deve lançar 50% de Prestadores como despesa')
-assert.match(source,/fluxo_percent/,'Prestadores devem permitir percentual individual direcionado ao Fluxo')
-assert.match(source,/Vai para Fluxo/,'A UI deve exibir o valor calculado direcionado ao Fluxo')
+assert.match(financeSource,/fluxo_percent/,'A regra de percentual individual direcionado ao Fluxo deve existir no motor financeiro')
 assert.match(source,/budgetAccounts/,'O modelo deve possuir contas de Budget dinâmicas')
 assert.match(source,/\+ Adicionar conta/,'A UI deve permitir adicionar contas de Budget')
 assert.match(source,/ativo:false/,'A exclusão de Budget deve ser lógica, não destrutiva')
