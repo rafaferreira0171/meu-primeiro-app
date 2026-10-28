@@ -11,12 +11,16 @@ if old not in s:
     raise SystemExit('Recurring ensure pattern not found')
 s = s.replace(old, new, 1)
 
-# Transfer expense references must be stable across recurring monthly copies.
+# Keep transfer references stable across recurring monthly copies. The transfer
+# patch may already have applied this replacement, so accept either state.
 old = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.id}`,label:x.nome,value:Number(x.valor||0)}))"
 new = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.series_id||x.id}`,label:x.nome,value:Number(x.valor||0)}))"
-if old not in s:
-    raise SystemExit('Transfer custom option pattern not found')
-s = s.replace(old, new, 1)
+if old in s:
+    s = s.replace(old, new, 1)
+else:
+    stable = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.series_id||x.id}`,label:x.nome,value:Number(x.valor||0)}))"
+    if stable not in s:
+        raise SystemExit('Transfer custom option pattern not found')
 
 p.write_text(s)
 print('Future-month recurrence and stable transfer references applied')
