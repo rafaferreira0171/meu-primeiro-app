@@ -35,6 +35,8 @@ jobs:
         run: python scripts/patch-fluxo-exclusao.py
       - name: Apply mobile layout refinement
         run: python scripts/patch-mobile-layout.py
+      - name: Apply refined visual hierarchy
+        run: python scripts/patch-visual-layout.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
