@@ -54,6 +54,8 @@ jobs:
         run: python scripts/patch-provider-future-edits.py
       - name: Apply future-month recurrence rules
         run: python scripts/patch-recurring-future-rules.py
+      - name: Apply iPhone login zoom fix
+        run: python scripts/patch-ios-login-zoom.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
