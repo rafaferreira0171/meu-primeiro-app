@@ -6,7 +6,7 @@ export const MONTHS=planningMonths()
 export const FLUXO_FIELDS=[['condominio','Condomínio'],['iptu','IPTU'],['gas','Gás'],['internet','Internet'],['luz','Luz'],['mercado','Mercado'],['combustivel','Combustível'],['seguro_carro','Seguro carro'],['convenio','Convênio'],['cartao','Cartão'],['celular','Celular'],['cabelo','Cabelo'],['academia','Academia'],['contabilidade','Contabilidade'],['pernambucanas','Pernambucanas'],['assin_chat','Assin. Chat'],['assin_apple','Assin. Apple'],['assin_ifood','Assin. iFood'],['assin_uber','Assin. Uber'],['outros','Outros']]
 export const AUTO_TAX=360
 export function totalPrestador(p){return !p?0:Number(p.salario||0)+Number(p.dias_uteis||0)*(Number(p.passagem_scs||0)+Number(p.passagem_sp||0))}
-export function fluxoPrestadorPercent(p){const pct=Math.min(100,Math.max(0,Number(p?.fluxo_percent??p?.percentual_fluxo??50)));return totalPrestador(p)*pct/100}
+export function fluxoPrestadorPercent(p){const pct=Math.min(100,Math.max(0,Number(p?.fluxo_percent??p?.percentual_fluxo??100)));return totalPrestador(p)*pct/100}
 export function totalPrestadores(list=[]){return list.reduce((s,p)=>s+totalPrestador(p),0)}
 export function totalPrestadoresFluxo(list=[]){return list.reduce((s,p)=>s+fluxoPrestadorPercent(p),0)}
 export function calcFluxoMonth(fluxo,prestadores=[],despesas=[],entradas=[]){const entries=Number(fluxo?.salario||0)+Number(fluxo?.va||0)+entradas.reduce((s,x)=>s+Number(x.valor||0),0);const fixed=FLUXO_FIELDS.reduce((s,[k])=>s+Number(fluxo?.[k]||0),0);const custom=despesas.reduce((s,x)=>s+Number(x.valor||0),0);const employeeTotal=totalPrestadoresFluxo(prestadores);const expenses=fixed+custom+employeeTotal+AUTO_TAX;return{entries,expenses,balance:entries-expenses,employeeTotal,tax:AUTO_TAX}}
