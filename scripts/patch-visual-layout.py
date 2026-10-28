@@ -9,10 +9,12 @@ s = s.replace('<div className="total">Total <b>{BRL(fm.entries)}</b></div>\n    
 s = s.replace('<Section title="Despesas">', '<div className="fluxo-card fluxo-expenses"><Section title="Despesas">', 1)
 s = s.replace('<button className="secondary" onClick={()=>{const n=prompt(\'Nome da nova despesa\');if(n){const v=prompt(\'Valor mensal\');if(v!==null)addSeries(\'despesas\',n,v)}}}>+ Nova conta</button>\n      </Section>', '<button className="secondary" onClick={()=>{const n=prompt(\'Nome da nova despesa\');if(n){const v=prompt(\'Valor mensal\');if(v!==null)addSeries(\'despesas\',n,v)}}}>+ Nova conta</button>\n      </Section></div>', 1)
 
-# Compact, premium bottom navigation labels for small screens.
 old_nav = "<nav>{[['fluxo','↔','Fluxo'],['prestadores','●','Prestadores'],['transferencias','▣','Transferências'],['budget','◫','Entradas x Budget'],['dash','◈','LookLiP Dash']].map(([k,i,l])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}>{i} {l}</button>)}</nav>"
 new_nav = "<nav aria-label=\"Navegação principal\">{[['fluxo','↔','Fluxo'],['prestadores','●','Prestadores'],['transferencias','▣','Transf.'],['budget','◫','Budget'],['dash','◈','Dash']].map(([k,i,l])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}><span className=\"nav-icon\">{i}</span><span className=\"nav-label\">{l}</span></button>)}</nav>"
 s = s.replace(old_nav, new_nav, 1)
+
+# Remove legacy platform branding from the authentication screen.
+s = s.replace('<p>Conta independente do Base44.</p>', '', 1)
 
 p.write_text(s)
 
@@ -53,4 +55,4 @@ if '/* LookLiP Finance visual hierarchy */' not in text:
 else:
     text = re.sub(r'/\* LookLiP Finance visual hierarchy \*/.*', css.strip()+"\n", text, flags=re.S)
     m.write_text(text)
-print('Fluxo semantic cards and refined bottom navigation applied')
+print('Fluxo semantic cards, refined bottom navigation, and clean authentication branding applied')
