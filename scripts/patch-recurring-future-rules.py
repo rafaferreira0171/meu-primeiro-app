@@ -17,13 +17,15 @@ new = "const custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).ma
 if old in s:
     s = s.replace(old, new, 1)
 
-# Repair the legacy malformed Row callback emitted by restore-components.py.
 for bad, good in {
     'onChange={v=>updateFlux({[k]:v})/>': 'onChange={v=>updateFlux({[k]:v})}/>',
     'onChange={v=>updateFlux({[k]:v)/>': 'onChange={v=>updateFlux({[k]:v})}/>',
     'updateFlux({[k]:v})/>': 'updateFlux({[k]:v})}/>',
 }.items():
     s = s.replace(bad, good)
+
+if 'future-month recurrence rules' not in s:
+    s = '// future-month recurrence rules\n' + s
 
 p.write_text(s)
 print('Future-month recurrence, stable transfer references and JSX normalization applied')
