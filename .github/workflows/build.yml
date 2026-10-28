@@ -40,6 +40,10 @@ jobs:
         run: python scripts/patch-mobile-layout.py
       - name: Apply refined visual hierarchy
         run: python scripts/patch-visual-layout.py
+      - name: Apply first-access onboarding
+        run: python scripts/patch-onboarding.py
+      - name: Apply onboarding visual styles
+        run: python scripts/patch-onboarding-style.py
       - name: Apply dashboard insights and charts
         run: python scripts/patch-dashboard-insights.py
       - name: Apply dashboard KPI formatting
@@ -109,8 +113,10 @@ jobs:
           grep -q "Assistente do seu dinheiro" dist/assets/*.js
           grep -q "Interpretar lançamento" dist/assets/*.js
           grep -q "SpeechRecognition" dist/assets/*.js
+          grep -q "Conheça o LookLiP Finance" dist/assets/*.js
+          grep -q "Começar a usar" dist/assets/*.js
           grep -q "future-month" src/main.jsx
-          echo "Enhanced Finance UI with recurrence, dashboard insights, action priorities, and Finance assistant is present"
+          echo "Enhanced Finance UI with onboarding, recurrence, dashboard insights, action priorities, and Finance assistant is present"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
