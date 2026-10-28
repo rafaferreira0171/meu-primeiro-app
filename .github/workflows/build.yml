@@ -39,6 +39,8 @@ jobs:
         run: python scripts/patch-mobile-layout.py
       - name: Apply refined visual hierarchy
         run: python scripts/patch-visual-layout.py
+      - name: Apply dashboard insights and charts
+        run: python scripts/patch-dashboard-insights.py
       - name: Apply current month across all tabs
         run: python scripts/patch-current-month-all-tabs.py
       - name: Apply provider future-month edit propagation
@@ -89,8 +91,11 @@ jobs:
           grep -q "Imposto é editável" dist/assets/*.js
           grep -q "Prestadores de Serviço" dist/assets/*.js
           grep -q "Excluir" dist/assets/*.js
+          grep -q "Leitura executiva" dist/assets/*.js
+          grep -q "Pressão das despesas" dist/assets/*.js
+          grep -q "Budget x realizado" dist/assets/*.js
           grep -q "future-month" src/main.jsx
-          echo "Enhanced Finance UI with recurrence and current-month behavior is present"
+          echo "Enhanced Finance UI with recurrence, current-month behavior, and dashboard insights is present"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
