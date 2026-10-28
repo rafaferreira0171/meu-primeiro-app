@@ -13,14 +13,13 @@ new_fluxo = r'''function Fluxo({data,month,setMonth,updateFlux,addSeries,updateS
 '''
 s = s[:start] + new_fluxo + s[end:]
 
-# Transfer selection must respect month-only exclusions and include provider total.
-old = "function transferOptions(data,month){const f=data.fluxo.find(x=>x.month===month)||{},fixed=FLUXO_FIELDS.map(([key,label])=>({id:`fluxo:${key}`,label,value:Number(f[key]||0)})),custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.id}`,label:x.nome,value:Number(x.valor||0)}));return [...fixed,...custom].filter(x=>x.value>0)}"
-new = "function transferOptions(data,month){const f=data.fluxo.find(x=>x.month===month)||{},ef=effectiveFluxo(f),fixed=FLUXO_FIELDS.map(([key,label])=>({id:`fluxo:${key}`,label,value:Number(ef[key]||0)})),prest=data.prestadores.filter(x=>x.month===month&&x.ativo!==false).reduce((s,x)=>s+totalPrestador(x)*(Number(x.percentual_fluxo??x.pct_fluxo??x.percentual??100)/100),0),custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.id}`,label:x.nome,value:Number(x.valor||0)}));const all=[...fixed];if(prest>0)all.push({id:'prestadores:total',label:'Prestadores de Serviço',value:prest});return [...all,...custom].filter(x=>x.value>0)}"
-if old not in s:
-    raise SystemExit('transferOptions pattern not found')
-s = s.replace(old, new)
+# Replace transferOptions robustly because the provider patch runs before this patch.
+start = s.index('function transferOptions(')
+end = s.index('function transferValue(', start)
+new_transfer = r'''function transferOptions(data,month){const f=data.fluxo.find(x=>x.month===month)||{},ef=effectiveFluxo(f),fixed=FLUXO_FIELDS.map(([key,label])=>({id:`fluxo:${key}`,label,value:Number(ef[key]||0)})),custom=data.despesas.filter(x=>x.month===month&&x.ativo!==false).map(x=>({id:`despesa:${x.id}`,label:x.nome,value:Number(x.valor||0)})),prestadoresTotal=data.prestadores.filter(x=>x.month===month&&x.ativo!==false).reduce((s,p)=>{const bruto=totalPrestador(p);const pct=Math.min(100,Math.max(0,Number(p.fluxo_percent??100)));return s+bruto*pct/100},0),prestadores=prestadoresTotal>0?[{id:'fluxo:prestadores',label:'Prestadores de Serviço',value:prestadoresTotal}]:[];return [...fixed,...prestadores,...custom].filter(x=>x.value>0)}
+'''
+s = s[:start] + new_transfer + s[end:]
 
-# Make Dashboard calculations honor month-only exclusions.
 s = s.replace('calcFluxoMonth(f,prest,despesas,entradas)', 'calcFluxoMonth(effectiveFluxo(f),prest,despesas,entradas)')
 s = s.replace("const expenseMap=new Map(),f=data.fluxo.find(x=>x.month===refMonth)||{};", "const expenseMap=new Map(),f=effectiveFluxo(data.fluxo.find(x=>x.month===refMonth)||{});")
 
