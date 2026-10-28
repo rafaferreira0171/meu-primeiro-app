@@ -78,7 +78,7 @@ jobs:
           grep -q "Prestadores de Serviço" dist/assets/*.js
           grep -q "Excluir" dist/assets/*.js
           grep -q "__delete" dist/assets/*.js
-          grep -q "removeSeries" dist/assets/*.js
+          grep -q "removeFixed" dist/assets/*.js
           echo "Enhanced Finance UI with true current-month deletion is present in compiled assets"
       - name: Verify Supabase source fallback
         run: |
