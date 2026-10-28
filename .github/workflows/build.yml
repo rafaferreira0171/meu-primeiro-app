@@ -23,6 +23,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Restore missing Finance components
         run: python scripts/restore-components.py
+      - name: Apply provider Fluxo percentage control
+        run: python scripts/patch-prestadores-percent.py
       - name: Validate restored Finance JSX
         run: |
           python - <<'PY'
@@ -58,7 +60,7 @@ jobs:
         run: |
           grep -q "createRoot" dist/assets/*.js
           grep -q "Fluxo" dist/assets/*.js
-          grep -q "Participação no custo" dist/assets/*.js
+          grep -q "Considerado no Fluxo" dist/assets/*.js
           grep -q "Valor calculado" dist/assets/*.js
           grep -q "Disponível" dist/assets/*.js
           grep -q "Evolução do saldo" dist/assets/*.js
