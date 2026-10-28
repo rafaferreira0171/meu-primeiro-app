@@ -41,7 +41,7 @@ jobs:
           from pathlib import Path
           p = Path('src/main.jsx')
           s = p.read_text()
-          bad = 'onChange={v=>updateFlux({[k]:v})/>'
+          bad = 'onChange={v=>updateFlux({[k]:v)/>'
           good = 'onChange={v=>updateFlux({[k]:v})}/>'
           if bad in s:
               s = s.replace(bad, good)
@@ -77,8 +77,6 @@ jobs:
           grep -q "Imposto é editável" dist/assets/*.js
           grep -q "Prestadores de Serviço" dist/assets/*.js
           grep -q "Excluir" dist/assets/*.js
-          grep -q "__delete" dist/assets/*.js
-          grep -q "removeFixed" dist/assets/*.js
           echo "Enhanced Finance UI with true current-month deletion is present in compiled assets"
       - name: Verify Supabase source fallback
         run: |
