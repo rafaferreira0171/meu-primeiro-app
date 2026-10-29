@@ -19,10 +19,13 @@ else:
     if count == 0 and new_update not in s:
         raise SystemExit('Fluxo update function pattern not found')
 
-old_add = "const addSeries=(field,nome,valor)=>{const numericValue=parseMoney(valor);const normalized=String(nome||'').trim().toLowerCase();if(field==='entradas'&&(normalized==='salário'||normalized==='salario'||normalized==='va')){const key=normalized==='va'?'va':'salario';save({...data,fluxo:data.fluxo.map(x=>x.month>=month?{...x,[key]:numericValue}:x)});return}const id=crypto.randomUUID();save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
+old_add_simple = "const addSeries=(field,nome,valor)=>{const id=crypto.randomUUID();const numericValue=parseMoney(valor);save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
+old_add_special = "const addSeries=(field,nome,valor)=>{const numericValue=parseMoney(valor);const normalized=String(nome||'').trim().toLowerCase();if(field==='entradas'&&(normalized==='salário'||normalized==='salario'||normalized==='va')){const key=normalized==='va'?'va':'salario';save({...data,fluxo:data.fluxo.map(x=>x.month>=month?{...x,[key]:numericValue}:x)});return}const id=crypto.randomUUID();save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
 new_add = "const addSeries=(field,nome,valor)=>{const id=crypto.randomUUID();const numericValue=parseMoney(valor);const normalized=String(nome||'').trim().toLowerCase();if(field==='entradas'&&(normalized==='salário'||normalized==='salario'||normalized==='va')){const key=normalized==='va'?'va':'salario';const fixedName=`__fixed__:${key}`;const cleanEntries=data.entradas.filter(x=>!(String(x.nome||'').toLowerCase()===fixedName&&x.month>=month));save({...data,fluxo:data.fluxo.map(x=>x.month>=month?{...x,[key]:numericValue}:x),entradas:[...cleanEntries,{id,series_id:id,month,nome:fixedName,valor:numericValue,ativo:true}]});return}save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
-if old_add in s:
-    s = s.replace(old_add, new_add, 1)
+if old_add_simple in s:
+    s = s.replace(old_add_simple, new_add, 1)
+elif old_add_special in s:
+    s = s.replace(old_add_special, new_add, 1)
 elif new_add not in s:
     raise SystemExit('addSeries pattern not found')
 
@@ -43,4 +46,4 @@ elif 'save={save} month={month} setMonth={setMonth} updateFlux={updateFlux}' not
     raise SystemExit('Fluxo render call pattern not found')
 
 p.write_text(s)
-print('Fluxo deletion patch now supports the restored deletion-aware update function.')
+print('Fluxo deletion patch supports the current restored addSeries implementation and persistent fixed-field events.')
