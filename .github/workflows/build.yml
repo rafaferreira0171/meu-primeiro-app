@@ -93,6 +93,22 @@ jobs:
         run: python scripts/restore-components.py
       - name: Harden auth startup and clean branding after final restore
         run: python scripts/patch-auth-login-stability.py
+      - name: Guarantee auth timeout in final source
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('src/main.jsx')
+          s = p.read_text()
+          if not ('Promise.race(' in s and 'getSession()' in s and 'setTimeout' in s and '5000' in s):
+              pattern = re.compile(r'useEffect\(\(\)=>\{let active=true;getSession\(\)\.then\(s=>\{if\(active\)setSession\(s\)\}\)\.catch\(\(\)=>\{if\(active\)setSession\(null\)\}\);const s=onAuthStateChange\(setSession\);return\(\)=>\{active=false;s\.data\.subscription\.unsubscribe\(\)\}\},\[\]\)')
+              replacement = "useEffect(()=>{let active=true;const timeout=new Promise(resolve=>setTimeout(()=>resolve(null),5000));Promise.race([getSession(),timeout]).then(s=>{if(active)setSession(s)}).catch(()=>{if(active)setSession(null)});const s=onAuthStateChange(setSession);return()=>{active=false;s.data.subscription.unsubscribe()}},[])"
+              s, count = pattern.subn(replacement, s, count=1)
+              if count != 1:
+                  raise SystemExit('Could not guarantee auth timeout in final App source')
+              p.write_text(s)
+          print('Final source contains auth timeout protection.')
+          PY
       - name: Verify Finance assistant after final auth hardening
         run: |
           python - <<'PY'
