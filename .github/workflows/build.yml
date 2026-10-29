@@ -60,6 +60,8 @@ jobs:
         run: python scripts/patch-ios-login-zoom.py
       - name: Final restore of Finance view components
         run: python scripts/restore-components.py
+      - name: Ensure Section component after final restore
+        run: python scripts/patch-ensure-section.py
       - name: Remove obsolete tax row after final restore
         run: |
           python - <<'PY'
@@ -91,6 +93,8 @@ jobs:
         run: python scripts/patch-auth-data-reload.py
       - name: Final restore before auth hardening
         run: python scripts/restore-components.py
+      - name: Ensure Section component before auth hardening
+        run: python scripts/patch-ensure-section.py
       - name: Harden auth startup and clean branding after final restore
         run: python scripts/patch-auth-login-stability.py
       - name: Guarantee auth timeout in final source
@@ -132,7 +136,7 @@ jobs:
           }
           for bad, good in replacements.items():
               s = s.replace(bad, good)
-          required = ['function Fluxo(', 'function Prestadores(', 'function Budget(', 'function Dash(', 'function FinanceAssistant(']
+          required = ['function Section({', 'function Fluxo(', 'function Prestadores(', 'function Budget(', 'function Dash(', 'function FinanceAssistant(']
           missing = [x for x in required if x not in s]
           if missing:
               raise SystemExit('Missing final Finance features: ' + ', '.join(missing))
