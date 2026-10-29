@@ -46,15 +46,11 @@ export async function persistData(data) {
   const currentMonth = new Date().toISOString().slice(0, 7)
   saveLocal(data, userId)
 
-  // normalizeData creates the standard Budget cards for future planning months
-  // so they can be displayed immediately. Those generated rows are not user
-  // records and some production RLS policies intentionally reject inserts for
-  // future months. Persist current/history defaults and all custom accounts,
-  // but never attempt to insert generated future default cards.
-  const budgetAccountsToPersist = (data.budgetAccounts || []).filter(row => {
-    const isGeneratedDefault = !!row.legacy_key
-    return !isGeneratedDefault || !row.month || row.month <= currentMonth
-  })
+  // normalizeData generates the standard Budget cards for planning months.
+  // They are UI defaults, not user-created records. The production RLS policy
+  // intentionally does not allow the client to insert these rows. Custom
+  // Budget accounts have no legacy_key and remain fully persisted.
+  const budgetAccountsToPersist = (data.budgetAccounts || []).filter(row => !row.legacy_key)
 
   await Promise.all([
     upsertUserSettings(userId, { start_month: data.startMonth || currentMonth }),
@@ -64,8 +60,9 @@ export async function persistData(data) {
     upsertRows('despesa', data.despesas || [], userId),
     upsertRows('gasto', data.gastos || [], userId),
     upsertRows('transferencia', data.transferencias || [], userId),
-    upsertRows('budget_account', budgetAccountsToPersist, userId)
+    ...(budgetAccountsToPersist.length ? [upsertRows('budget_account', budgetAccountsToPersist, userId)] : [])
   ])
+
   const cleanupOptions = { preserveHistory: true, fromMonth: currentMonth }
   await Promise.all([
     deleteRowsNotInIds('entrada', (data.entradas || []).map(row => row.id), userId, cleanupOptions),
@@ -73,7 +70,7 @@ export async function persistData(data) {
     deleteRowsNotInIds('despesa', (data.despesas || []).map(row => row.id), userId, cleanupOptions),
     deleteRowsNotInIds('gasto', (data.gastos || []).map(row => row.id), userId, cleanupOptions),
     deleteRowsNotInIds('transferencia', (data.transferencias || []).map(row => row.id), userId, cleanupOptions),
-    deleteRowsNotInIds('budget_account', (data.budgetAccounts || []).map(row => row.id), userId, cleanupOptions)
+    deleteRowsNotInIds('budget_account', budgetAccountsToPersist.map(row => row.id), userId, cleanupOptions)
   ])
   return { persisted: true, mode: 'supabase' }
 }
