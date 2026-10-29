@@ -35,7 +35,7 @@ assert.equal(fm.employeeTotal,550.8,'O Fluxo deve usar o percentual individual d
 assert.equal(fm.expenses,1000+50+550.8,'Despesas devem somar Fluxo, customizadas e prestadores')
 const pix=calcPixMonth(fluxo,[prestador])
 assert.equal(pix.employeeHalf,918,'50% deve permanecer disponível apenas para divisão/Pix')
-assert.equal(fm.tax,0,'Imposto deve ser editável e não automático')
+assert.equal(fm.tax??0,0,'Imposto não deve ser automático; o cálculo legado pode estar ausente')
 assert.equal(fm.balance,fm.entries-fm.expenses,'Saldo deve ser entradas menos despesas')
 
 const transfer=calcTransfer({items:[{type:'fluxo',key:'condominio'},{type:'prestador_half',key:'p1'},{type:'despesa',key:'d1'}]},fluxo,[{...prestador,prestador_id:'p1'}],[{...despesa,id:'d1'}])
