@@ -64,7 +64,17 @@ jobs:
         run: python scripts/patch-ios-login-zoom.py
       - name: Final restore of Finance view components
         run: python scripts/restore-components.py
-      - name: Validate restored Finance JSX
+      - name: Reapply latest Dashboard and Finance features after final restore
+        run: |
+          python scripts/patch-dashboard-insights.py
+          python scripts/patch-dashboard-kpi.py
+          python scripts/patch-dashboard-actions.py
+          python scripts/patch-finance-assistant.py
+          python scripts/patch-current-month-all-tabs.py
+          python scripts/patch-provider-future-edits.py
+          python scripts/patch-recurring-future-rules.py
+          python scripts/patch-ios-login-zoom.py
+      - name: Validate final Finance feature set
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -76,10 +86,12 @@ jobs:
           }
           for bad, good in replacements.items():
               s = s.replace(bad, good)
-          if 'function Fluxo(' not in s or 'function Prestadores(' not in s or 'function Budget(' not in s or 'function Dash(' not in s:
-              raise SystemExit('Finance view components are missing after final restoration')
+          required = ['function Fluxo(', 'function Prestadores(', 'function Budget(', 'function Dash(', 'function FinanceAssistant(', 'Prioridades de ação']
+          missing = [x for x in required if x not in s]
+          if missing:
+              raise SystemExit('Missing final Finance features: ' + ', '.join(missing))
           p.write_text(s)
-          print('Finance JSX normalization and component validation complete')
+          print('Final Finance feature set validated:', ', '.join(required))
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -125,5 +137,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Dashboard action-priority restoration trigger
