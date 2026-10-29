@@ -21,6 +21,15 @@ export async function signUp(email, password) {
   })
 }
 
+export async function resendSignupConfirmation(email) {
+  if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
+  return supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: appRedirectUrl() },
+  })
+}
+
 export async function signOut() {
   if (supabase) await supabase.auth.signOut()
 }
