@@ -50,8 +50,6 @@ jobs:
         run: python scripts/patch-dashboard-insights.py
       - name: Apply dashboard KPI formatting
         run: python scripts/patch-dashboard-kpi.py
-      - name: Apply dashboard action priorities
-        run: python scripts/patch-dashboard-actions.py
       - name: Apply Finance assistant
         run: python scripts/patch-finance-assistant.py
       - name: Apply current month across all tabs
@@ -64,11 +62,10 @@ jobs:
         run: python scripts/patch-ios-login-zoom.py
       - name: Final restore of Finance view components
         run: python scripts/restore-components.py
-      - name: Reapply latest Dashboard and Finance features after final restore
+      - name: Reapply latest Finance features after final restore
         run: |
           python scripts/patch-dashboard-insights.py
           python scripts/patch-dashboard-kpi.py
-          python scripts/patch-dashboard-actions.py
           python scripts/patch-finance-assistant.py
           python scripts/patch-current-month-all-tabs.py
           python scripts/patch-provider-future-edits.py
@@ -86,7 +83,7 @@ jobs:
           }
           for bad, good in replacements.items():
               s = s.replace(bad, good)
-          required = ['function Fluxo(', 'function Prestadores(', 'function Budget(', 'function Dash(', 'function FinanceAssistant(', 'Prioridades de ação']
+          required = ['function Fluxo(', 'function Prestadores(', 'function Budget(', 'function Dash(', 'function FinanceAssistant(']
           missing = [x for x in required if x not in s]
           if missing:
               raise SystemExit('Missing final Finance features: ' + ', '.join(missing))
