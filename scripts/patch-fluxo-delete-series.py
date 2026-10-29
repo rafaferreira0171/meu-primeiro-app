@@ -4,23 +4,21 @@ import re
 p = Path('src/main.jsx')
 s = p.read_text()
 
-# Fluxo fixed columns are NOT NULL. Persist deletion/recreation as event rows in
-# the existing entrada table instead of writing NULL into fluxo.salario/va/etc.
 old_update_null = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(p.__delete&&x.month>=month){const y={...x};for(const k of p.__delete)y[k]=null;return y}return x.month===month?{...x,...p}:x})});"
 old_update_base = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});"
+old_update_delete = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(p.__delete&&x.month>=month){const y={...x};for(const k of p.__delete)delete y[k];return y}return x.month===month?{...x,...p}:x})});"
 new_update = "const updateFlux=p=>{if(p.__delete){const keys=p.__delete;const events=keys.map(k=>({id:crypto.randomUUID(),series_id:crypto.randomUUID(),month,nome:`__fixed__:${k}`,valor:0,ativo:false}));const fluxo=data.fluxo.map(x=>{if(x.month<month)return x;const y={...x};for(const k of keys)y[k]=0;return y});save({...data,fluxo,entradas:[...data.entradas.filter(x=>!(String(x.nome||'').toLowerCase().startsWith('__fixed__:')&&x.month>=month)),...events]});return}save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});};"
 if old_update_null in s:
     s = s.replace(old_update_null, new_update, 1)
 elif old_update_base in s:
     s = s.replace(old_update_base, new_update, 1)
+elif old_update_delete in s:
+    s = s.replace(old_update_delete, new_update, 1)
 else:
-    # Be tolerant of harmless formatting differences in the restored source.
     s, count = re.subn(r'const updateFlux=p=>save\(\{\.\.\.data,fluxo:data\.fluxo\.map\(x=>x\.month===month\?\{\.\.\.x,\.\.\.p\}:x\)\}\);', new_update, s, count=1)
     if count == 0 and new_update not in s:
         raise SystemExit('Fluxo update function pattern not found')
 
-# Recreating Salário/VA restores the fixed field and removes fixed-field
-# deletion events from the selected month onward, avoiding duplicates.
 old_add = "const addSeries=(field,nome,valor)=>{const numericValue=parseMoney(valor);const normalized=String(nome||'').trim().toLowerCase();if(field==='entradas'&&(normalized==='salário'||normalized==='salario'||normalized==='va')){const key=normalized==='va'?'va':'salario';save({...data,fluxo:data.fluxo.map(x=>x.month>=month?{...x,[key]:numericValue}:x)});return}const id=crypto.randomUUID();save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
 new_add = "const addSeries=(field,nome,valor)=>{const id=crypto.randomUUID();const numericValue=parseMoney(valor);const normalized=String(nome||'').trim().toLowerCase();if(field==='entradas'&&(normalized==='salário'||normalized==='salario'||normalized==='va')){const key=normalized==='va'?'va':'salario';const fixedName=`__fixed__:${key}`;const cleanEntries=data.entradas.filter(x=>!(String(x.nome||'').toLowerCase()===fixedName&&x.month>=month));save({...data,fluxo:data.fluxo.map(x=>x.month>=month?{...x,[key]:numericValue}:x),entradas:[...cleanEntries,{id,series_id:id,month,nome:fixedName,valor:numericValue,ativo:true}]});return}save({...data,[field]:[...data[field],{id,series_id:id,month,nome,valor:numericValue,ativo:true}]})};"
 if old_add in s:
@@ -45,4 +43,4 @@ elif 'save={save} month={month} setMonth={setMonth} updateFlux={updateFlux}' not
     raise SystemExit('Fluxo render call pattern not found')
 
 p.write_text(s)
-print('Fixed Fluxo deletion using persistent fixed-field events; no NULL is written to NOT NULL fluxo columns.')
+print('Fluxo deletion patch now supports the restored deletion-aware update function.')
