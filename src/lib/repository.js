@@ -4,7 +4,7 @@ const tables = ['fluxo','empregada','prestador','entrada','despesa','gasto','tra
 
 // Do not use select('*') here. The restored production database can retain stale
 // PostgREST schema-cache metadata from older Base44-era fields (for example
-// __deletedFields). Explicit columns keep the app independent of those ghosts.
+// __deletedFields). Explicit columns keep the app independent from those ghosts.
 const tableColumns = {
   fluxo: 'id,user_id,month,salario,va,condominio,iptu,gas,internet,luz,mercado,combustivel,seguro_carro,convenio,cartao,celular,cabelo,academia,contabilidade,pernambucanas,assin_chat,assin_apple,assin_ifood,assin_uber,outros,imposto',
   empregada: 'id,user_id,month,salario,dias_uteis,passagem_scs,passagem_sp',
@@ -21,6 +21,9 @@ export async function loadFinanceData(userId) {
   const results = await Promise.all(tables.map(async table => {
     const { data, error } = await supabase.from(table).select(tableColumns[table]).eq('user_id', userId).order('month')
     if (error) throw error
+    if (table === 'transferencia') {
+      return [table, (data || []).map(row => ({ ...row, expenseRefs: Array.isArray(row.items) ? row.items : [] }))]
+    }
     return [table, data || []]
   }))
   return Object.fromEntries(results)
@@ -44,7 +47,13 @@ export async function upsertUserSettings(userId, settings) {
 export async function upsertRows(table, rows, userId) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
   if (!rows.length) return []
-  const payload = rows.map(row => ({ ...row, user_id: userId }))
+  const payload = rows.map(row => {
+    if (table === 'transferencia') {
+      const { expenseRefs, ...rest } = row
+      return { ...rest, items: Array.isArray(expenseRefs) ? expenseRefs : (Array.isArray(row.items) ? row.items : []), user_id: userId }
+    }
+    return { ...row, user_id: userId }
+  })
   const conflict = table === 'fluxo' || table === 'empregada' ? 'user_id,month' : 'id'
   const { data, error } = await supabase.from(table).upsert(payload, { onConflict: conflict }).select(tableColumns[table])
   if (error) throw error
