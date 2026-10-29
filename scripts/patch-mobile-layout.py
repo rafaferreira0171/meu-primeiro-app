@@ -11,6 +11,8 @@ css = r'''
 .provider-total-control input{width:100%;min-height:42px;border:1px solid #dfe4eb;background:#f8f9fb;border-radius:10px;padding:8px 10px;text-align:right;font-size:16px;box-sizing:border-box}
 .provider-total-control input:focus{outline:2px solid #3972e84d;background:#fff;border-color:#b9cbf6}
 .danger{color:var(--danger)!important}
+/* The initial loading splash must never become part of the scrollable app. */
+.app .login{display:none!important}
 @media(max-width:520px){
   body{font-size:14px}
   .app main{padding-left:8px!important;padding-right:8px!important;padding-bottom:88px!important}
