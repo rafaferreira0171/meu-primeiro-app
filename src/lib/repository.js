@@ -59,6 +59,19 @@ export async function upsertRows(table, rows, userId) {
         ativo: row.ativo !== false,
       }
     }
+    if (table === 'gasto') {
+      return {
+        id: row.id,
+        user_id: userId,
+        month: row.month,
+        conta: row.conta,
+        budget_account_id: row.budget_account_id || null,
+        valor: Number(row.valor || 0),
+        // The Budget UI creates ordinary launches, not adjustments. The DB
+        // column is NOT NULL, so never send undefined/null for this field.
+        is_ajuste: row.is_ajuste === true,
+      }
+    }
     return { ...row, user_id: userId }
   })
   const conflict = table === 'fluxo' || table === 'empregada' ? 'user_id,month' : 'id'
