@@ -4,20 +4,25 @@ import re
 p = Path('src/main.jsx')
 s = p.read_text()
 
-old = "useEffect(()=>{let active=true;getSession().then(s=>{if(active)setSession(s)}).catch(()=>{if(active)setSession(null)});const s=onAuthStateChange(setSession);return()=>{active=false;s.data.subscription.unsubscribe()}},[])"
-new = "useEffect(()=>{let active=true;const timeout=new Promise(resolve=>setTimeout(()=>resolve(null),5000));Promise.race([getSession(),timeout]).then(s=>{if(active)setSession(s)}).catch(()=>{if(active)setSession(null)});const s=onAuthStateChange(setSession);return()=>{active=false;s.data.subscription.unsubscribe()}},[])"
-if old in s:
-    s = s.replace(old, new, 1)
-elif new not in s:
-    pattern = re.compile(r'useEffect\(\(\)=>\{let active=true;getSession\(\)\.then\(s=>\{if\(active\)setSession\(s\)\}\)\.catch\(\(\)=>\{if\(active\)setSession\(null\)\}\);const s=onAuthStateChange\(setSession\);return\(\)=>\{active=false;s\.data\.subscription\.unsubscribe\(\)\}\},\[\]\)')
-    replacement = new
-    s, count = pattern.subn(replacement, s, count=1)
-    if count != 1:
-        raise SystemExit('Expected auth session initializer not found; refusing to alter unknown source')
+# Reapply the signup confirmation UI first. That patch rewrites only Login,
+# so the auth startup hardening below is guaranteed to be the final auth edit.
+exec(Path('scripts/patch-auth-confirmation.py').read_text(), {'__name__': '__patch_auth_confirmation__'})
+s = p.read_text()
 
-# Never let finance-data loading block the logged-out login screen. The app
-# should resolve authentication first; only an authenticated session needs
-# Supabase finance data before entering the main app.
+# Add a hard timeout directly around the real getSession() call. This avoids
+# depending on the exact formatting of the App initializer restored upstream.
+if 'Promise.race([' not in s or 'setTimeout(()=>resolve(null),5000)' not in s:
+    updated, count = re.subn(
+        r'getSession\(\)\.then\(',
+        'Promise.race([getSession(),new Promise(resolve=>setTimeout(()=>resolve(null),5000))]).then(',
+        s,
+        count=1,
+    )
+    if count != 1:
+        raise SystemExit('Expected getSession initializer not found; refusing to alter unknown source')
+    s = updated
+
+# Never let finance-data loading block the logged-out login screen.
 old_gate = "if(session===undefined||!hasLoaded)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;"
 new_gate = "if(session===undefined)return <Splash/>;if(!session&&!hasSupabaseConfig()){}else if(!session&&hasSupabaseConfig())return <Login/>;if(!hasLoaded)return <Splash/>;"
 if old_gate in s:
@@ -25,12 +30,8 @@ if old_gate in s:
 elif new_gate not in s:
     raise SystemExit('Expected auth loading gate not found; refusing to alter unknown source')
 
-# The final component restore can replace the signup UI, so reapply the
-# confirmation/resend controls at the end of the patch chain.
-exec(Path('scripts/patch-auth-confirmation.py').read_text(), {'__name__': '__patch_auth_confirmation__'})
-s = p.read_text()
 s = s.replace('<p>Conta independente do Base44.</p>', '')
 s = s.replace('Conta independente do Base44.', '')
 
 p.write_text(s)
-print('Auth startup hardened; signup confirmation resend reapplied after final restore; Base44 branding removed.')
+print('Auth startup hardened with a direct getSession timeout; signup confirmation resend preserved; Base44 branding removed.')
