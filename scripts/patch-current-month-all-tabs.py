@@ -18,13 +18,16 @@ if month_effect not in s:
     s = s[:app_end + 1] + month_effect + s[app_end + 1:]
 
 # The first render can race with Supabase session restoration. Load the finance
-# data only after the auth session is known, so AUTH_REQUIRED is never shown
-# as a stale banner after a successful login/confirmation.
+# data only after the auth session is known. The restore step can already carry
+# this newer hook, so treat it as already applied instead of failing.
 old_hook = "function useFinance(){const[hasLoaded,setHasLoaded]=useState(false),[data,setData]=useState(seed),[busy,setBusy]=useState(false),[error,setError]=useState('');useEffect(()=>{let active=true;setBusy(true);loadData(seed).then(x=>{if(active)setData(normalizeData(x))}).catch(e=>{if(active)setError(e.message||'Não foi possível carregar os dados.')}).finally(()=>{if(active){setHasLoaded(true);setBusy(false)}});return()=>{active=false}},[]);"
 new_hook = "function useFinance(){const[hasLoaded,setHasLoaded]=useState(false),[data,setData]=useState(seed),[busy,setBusy]=useState(false),[error,setError]=useState('');useEffect(()=>{let active=true;setBusy(true);getSession().then(()=>loadData(seed)).then(x=>{if(active)setData(normalizeData(x))}).catch(e=>{if(active)setError(e.message||'Não foi possível carregar os dados.')}).finally(()=>{if(active){setHasLoaded(true);setBusy(false)}});return()=>{active=false}},[]);"
-if old_hook not in s:
-    raise SystemExit('useFinance session-race pattern not found')
-s = s.replace(old_hook, new_hook, 1)
+if old_hook in s:
+    s = s.replace(old_hook, new_hook, 1)
+elif new_hook in s:
+    print('Current month patch already applied; leaving existing session-safe hook unchanged')
+else:
+    raise SystemExit('useFinance hook pattern is neither legacy nor already patched')
 
 p.write_text(s)
 print('Current month is enforced whenever the user enters or changes a Finance tab, and initial data loading waits for Supabase session restoration.')
