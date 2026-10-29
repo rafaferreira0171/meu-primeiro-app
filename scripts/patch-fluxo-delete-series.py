@@ -5,10 +5,13 @@ s = p.read_text()
 
 # Fluxo fixed columns are NOT NULL. Persist deletion/recreation as event rows in
 # the existing entrada table instead of writing NULL into fluxo.salario/va/etc.
-old_update = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(p.__delete&&x.month>=month){const y={...x};for(const k of p.__delete)y[k]=null;return y}return x.month===month?{...x,...p}:x})});"
+old_update_null = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>{if(p.__delete&&x.month>=month){const y={...x};for(const k of p.__delete)y[k]=null;return y}return x.month===month?{...x,...p}:x})});"
+old_update_base = "const updateFlux=p=>save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});"
 new_update = "const updateFlux=p=>{if(p.__delete){const keys=p.__delete;const events=keys.map(k=>({id:crypto.randomUUID(),series_id:crypto.randomUUID(),month,nome:`__fixed__:${k}`,valor:0,ativo:false}));const fluxo=data.fluxo.map(x=>{if(x.month<month)return x;const y={...x};for(const k of keys)y[k]=0;return y});save({...data,fluxo,entradas:[...data.entradas.filter(x=>!(String(x.nome||'').toLowerCase().startsWith('__fixed__:')&&x.month>=month)),...events]});return}save({...data,fluxo:data.fluxo.map(x=>x.month===month?{...x,...p}:x)});};"
-if old_update in s:
-    s = s.replace(old_update, new_update, 1)
+if old_update_null in s:
+    s = s.replace(old_update_null, new_update, 1)
+elif old_update_base in s:
+    s = s.replace(old_update_base, new_update, 1)
 elif new_update not in s:
     raise SystemExit('Fluxo update function pattern not found')
 
