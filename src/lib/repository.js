@@ -47,6 +47,42 @@ export async function upsertUserSettings(userId, settings) {
 export async function upsertRows(table, rows, userId) {
   if (!hasSupabaseConfig()) throw new Error('BACKEND_NOT_CONFIGURED')
   if (!rows.length) return []
+
+  // budget_account is intentionally INSERT-only here. The production RLS policy
+  // permits a user to create/delete their own Budget accounts but its UPDATE
+  // USING policy is not available. A normal upsert becomes INSERT ... ON CONFLICT
+  // DO UPDATE and therefore fails on already-existing accounts with:
+  // "new row violates row-level security policy (USING expression)".
+  // Generic Finance saves must therefore never try to update existing Budget
+  // accounts. New custom accounts are inserted once; later saves leave them alone.
+  if (table === 'budget_account') {
+    const ids = rows.map(row => row.id).filter(Boolean)
+    let existingIds = new Set()
+    if (ids.length) {
+      const { data: existing, error: readError } = await supabase
+        .from('budget_account')
+        .select('id')
+        .eq('user_id', userId)
+        .in('id', ids)
+      if (readError) throw readError
+      existingIds = new Set((existing || []).map(row => row.id))
+    }
+    const newRows = rows.filter(row => row.id && !existingIds.has(row.id))
+    if (!newRows.length) return []
+    const payload = newRows.map(row => ({
+      id: row.id,
+      user_id: userId,
+      month: row.month,
+      nome: row.nome,
+      budget: Number(row.budget || 0),
+      legacy_key: row.legacy_key || null,
+      ativo: row.ativo !== false,
+    }))
+    const { data, error } = await supabase.from('budget_account').insert(payload).select(tableColumns.budget_account)
+    if (error) throw error
+    return data || []
+  }
+
   const payload = rows.map(row => {
     if (table === 'transferencia') {
       return {
