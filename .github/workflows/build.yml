@@ -78,6 +78,7 @@ jobs:
       - name: Reapply latest Finance features after final restore
         run: |
           python scripts/patch-prestadores-percent.py
+          python scripts/patch-transferencias-prestadores.py
           python scripts/patch-dashboard-insights.py
           python scripts/patch-dashboard-kpi.py
           python scripts/patch-current-month-all-tabs.py
@@ -106,6 +107,10 @@ jobs:
               raise SystemExit('Fluxo recurring delete button is missing')
           if '% considerar no Fluxo' not in s:
               raise SystemExit('Provider Fluxo percentage control is missing')
+          if 'expenseRefs' in s:
+              raise SystemExit('Transferencias UI still generates obsolete expenseRefs field')
+          if 'function Transferencias(' not in s or 'items:[...(Array.isArray(t.items)?t.items:[])]' not in s:
+              raise SystemExit('Transferencias persistence fix is missing')
           p.write_text(s)
           css = Path('src/styles.css').read_text()
           if '.series-row{' not in css:
@@ -114,6 +119,7 @@ jobs:
           print('Automatic tax row validated as removed.')
           print('Fluxo recurring delete buttons validated.')
           print('Provider Fluxo percentage control validated.')
+          print('Transferencias validated to persist using items only.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -160,4 +166,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# Trigger a fresh deployment so the current Fluxo delete-button patch reaches Pages.
+# Trigger a fresh deployment so the current Finance patches reach Pages.
