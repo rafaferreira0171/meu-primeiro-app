@@ -10,8 +10,12 @@ create table if not exists public.fluxo (
   cartao numeric not null default 0, celular numeric not null default 0, cabelo numeric not null default 0,
   academia numeric not null default 0, contabilidade numeric not null default 0, pernambucanas numeric not null default 0,
   assin_chat numeric not null default 0, assin_apple numeric not null default 0, assin_ifood numeric not null default 0,
-  assin_uber numeric not null default 0, outros numeric not null default 0, unique(user_id, month)
+  assin_uber numeric not null default 0, outros numeric not null default 0, imposto numeric not null default 0, unique(user_id, month)
 );
+
+-- Safe upgrade for an already-created Supabase project.
+alter table public.fluxo add column if not exists imposto numeric not null default 0;
+
 create table if not exists public.empregada (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
   month text not null, salario numeric not null default 0, dias_uteis numeric not null default 0,
