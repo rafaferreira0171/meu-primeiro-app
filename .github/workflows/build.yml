@@ -93,8 +93,17 @@ jobs:
         run: python scripts/restore-components.py
       - name: Harden auth startup and clean branding after final restore
         run: python scripts/patch-auth-login-stability.py
-      - name: Reapply Finance assistant after final auth hardening
-        run: python scripts/patch-finance-assistant.py
+      - name: Verify Finance assistant after final auth hardening
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s = Path('src/main.jsx').read_text()
+          if 'function FinanceAssistant(' not in s:
+              raise SystemExit('FinanceAssistant was lost after final auth hardening')
+          if '<FinanceAssistant data={data} save={save} month={month}/>' not in s:
+              raise SystemExit('FinanceAssistant mount was lost after final auth hardening')
+          print('Finance assistant preserved after final auth hardening.')
+          PY
       - name: Validate final Finance feature set
         run: |
           python - <<'PY'
