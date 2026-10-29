@@ -155,3 +155,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+# Trigger a fresh deployment so the current Fluxo delete-button patch reaches Pages.
