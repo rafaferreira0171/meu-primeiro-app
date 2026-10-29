@@ -89,6 +89,8 @@ jobs:
           python scripts/patch-ios-login-zoom.py
       - name: Apply auth-aware data reload after final restore
         run: python scripts/patch-auth-data-reload.py
+      - name: Harden auth startup and clean branding
+        run: python scripts/patch-auth-login-stability.py
       - name: Validate final Finance feature set
         run: |
           python - <<'PY'
@@ -119,17 +121,17 @@ jobs:
               raise SystemExit('Budget account delete button is missing')
           if 'function useFinance(session)' not in s or 'loadData(seed)' not in s or '[session?.user?.id]' not in s:
               raise SystemExit('Auth-aware finance data reload is missing')
+          if 'Promise.race([getSession(),timeout])' not in s:
+              raise SystemExit('Auth startup timeout protection is missing')
+          if 'Conta independente do Base44' in s:
+              raise SystemExit('Legacy Base44 branding is still present')
           p.write_text(s)
           css = Path('src/styles.css').read_text()
           if '.series-row{' not in css:
               raise SystemExit('Fluxo delete button styles are missing')
           print('Final Finance feature set validated:', ', '.join(required))
-          print('Automatic tax row validated as removed.')
-          print('Fluxo recurring delete buttons validated.')
-          print('Provider Fluxo percentage control validated.')
-          print('Transferencias validated to persist using items only.')
-          print('Budget account delete button validated.')
-          print('Auth-aware data reload validated.')
+          print('Auth startup timeout validated.')
+          print('Legacy Base44 branding removed.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
