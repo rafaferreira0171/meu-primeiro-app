@@ -49,8 +49,15 @@ export async function upsertRows(table, rows, userId) {
   if (!rows.length) return []
   const payload = rows.map(row => {
     if (table === 'transferencia') {
-      const { expenseRefs, ...rest } = row
-      return { ...rest, items: Array.isArray(expenseRefs) ? expenseRefs : (Array.isArray(row.items) ? row.items : []), user_id: userId }
+      return {
+        id: row.id,
+        user_id: userId,
+        series_id: row.series_id || row.id,
+        month: row.month,
+        nome: row.nome,
+        items: Array.isArray(row.items) ? row.items : (Array.isArray(row.expenseRefs) ? row.expenseRefs : []),
+        ativo: row.ativo !== false,
+      }
     }
     return { ...row, user_id: userId }
   })
