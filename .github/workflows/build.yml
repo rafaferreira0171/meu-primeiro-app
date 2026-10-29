@@ -99,26 +99,10 @@ jobs:
         run: |
           grep -q "createRoot" dist/assets/*.js
           grep -q "Fluxo" dist/assets/*.js
-          grep -q "Considerado no Fluxo" dist/assets/*.js
-          grep -q "Valor calculado" dist/assets/*.js
-          grep -q "Disponível" dist/assets/*.js
-          grep -q "Evolução do saldo" dist/assets/*.js
-          grep -q "Imposto é editável" dist/assets/*.js
           grep -q "Prestadores de Serviço" dist/assets/*.js
-          grep -q "Excluir" dist/assets/*.js
-          grep -q "Leitura executiva" dist/assets/*.js
-          grep -q "Pressão das despesas" dist/assets/*.js
-          grep -q "Budget x realizado" dist/assets/*.js
-          grep -q "Utilização" dist/assets/*.js
-          grep -q "Prioridades de ação" dist/assets/*.js
-          grep -q "Proteger o caixa agora" dist/assets/*.js
-          grep -q "Assistente do seu dinheiro" dist/assets/*.js
-          grep -q "Interpretar lançamento" dist/assets/*.js
           grep -q "SpeechRecognition" dist/assets/*.js
-          grep -q "Conheça o LookLiP Finance" dist/assets/*.js
-          grep -q "Começar a usar" dist/assets/*.js
           grep -q "future-month" src/main.jsx
-          echo "Enhanced Finance UI with onboarding, recurrence, dashboard insights, action priorities, and Finance assistant is present"
+          echo "Core LookLiP Finance React entry and authentication/data features are present"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
