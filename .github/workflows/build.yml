@@ -71,6 +71,10 @@ jobs:
           p.write_text(s)
           print('Obsolete automatic tax row removed from final Fluxo component.')
           PY
+      - name: Apply Fluxo recurring delete buttons after final restore
+        run: |
+          python scripts/patch-fluxo-delete-series.py
+          python scripts/patch-fluxo-delete-series-style.py
       - name: Reapply latest Finance features after final restore
         run: |
           python scripts/patch-dashboard-insights.py
@@ -97,9 +101,15 @@ jobs:
               raise SystemExit('Missing final Finance features: ' + ', '.join(missing))
           if 'label="Imposto"' in s or 'Prestadores e imposto entram automaticamente' in s:
               raise SystemExit('Obsolete automatic tax row is still present in final Fluxo component')
+          if 'series-delete' not in s:
+              raise SystemExit('Fluxo recurring delete button is missing')
           p.write_text(s)
+          css = Path('src/styles.css').read_text()
+          if '.series-row{' not in css:
+              raise SystemExit('Fluxo delete button styles are missing')
           print('Final Finance feature set validated:', ', '.join(required))
           print('Automatic tax row validated as removed.')
+          print('Fluxo recurring delete buttons validated.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
