@@ -91,6 +91,8 @@ jobs:
         run: python scripts/patch-auth-data-reload.py
       - name: Harden auth startup and clean branding
         run: python scripts/patch-auth-login-stability.py
+      - name: Restore Finance components after auth patch
+        run: python scripts/restore-components.py
       - name: Validate final Finance feature set
         run: |
           python - <<'PY'
