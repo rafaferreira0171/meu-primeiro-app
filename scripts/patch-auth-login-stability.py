@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 p = Path('src/main.jsx')
 s = p.read_text()
@@ -8,7 +9,11 @@ new = "useEffect(()=>{let active=true;const timeout=new Promise(resolve=>setTime
 if old in s:
     s = s.replace(old, new, 1)
 elif new not in s:
-    raise SystemExit('Expected auth session initializer not found; refusing to alter unknown source')
+    pattern = re.compile(r'useEffect\(\(\)=>\{let active=true;getSession\(\)\.then\(s=>\{if\(active\)setSession\(s\)\}\)\.catch\(\(\)=>\{if\(active\)setSession\(null\)\}\);const s=onAuthStateChange\(setSession\);return\(\)=>\{active=false;s\.data\.subscription\.unsubscribe\(\)\}\},\[\]\)')
+    replacement = new
+    s, count = pattern.subn(replacement, s, count=1)
+    if count != 1:
+        raise SystemExit('Expected auth session initializer not found; refusing to alter unknown source')
 
 # Never let finance-data loading block the logged-out login screen. The app
 # should resolve authentication first; only an authenticated session needs
