@@ -20,8 +20,12 @@ if old_gate in s:
 elif new_gate not in s:
     raise SystemExit('Expected auth loading gate not found; refusing to alter unknown source')
 
+# The final component restore can replace the signup UI, so reapply the
+# confirmation/resend controls at the end of the patch chain.
+exec(Path('scripts/patch-auth-confirmation.py').read_text(), {'__name__': '__patch_auth_confirmation__'})
+s = p.read_text()
 s = s.replace('<p>Conta independente do Base44.</p>', '')
 s = s.replace('Conta independente do Base44.', '')
 
 p.write_text(s)
-print('Auth startup hardened: logged-out users reach Login independently of finance-data loading; Base44 branding removed.')
+print('Auth startup hardened; signup confirmation resend reapplied after final restore; Base44 branding removed.')
