@@ -1,0 +1,55 @@
+name: Remove obsolete Imposto
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  remove-imposto:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove obsolete tax row
+        id: remove
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('src/main.jsx')
+          s = p.read_text()
+          old_row = '<Row label="Imposto" value={fm.tax} auto/>'
+          old_note = '<div className="note">Prestadores e imposto entram automaticamente. Encerrar preserva o histórico.</div>'
+          new_note = '<div className="note">Prestadores são calculados automaticamente. Encerrar preserva o histórico.</div>'
+          changed = False
+          if old_row in s:
+              s = s.replace(old_row, '', 1)
+              changed = True
+          if old_note in s:
+              s = s.replace(old_note, new_note, 1)
+              changed = True
+          if changed:
+              p.write_text(s)
+              print('Obsolete Imposto removed from Fluxo.')
+          else:
+              print('Imposto already removed; no source change needed.')
+          Path('/tmp/changed').write_text('1' if changed else '0')
+
+      - name: Commit source correction and trigger build
+        if: steps.remove.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if [ "$(cat /tmp/changed)" = "1" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/main.jsx
+            git commit -m "Remove obsolete automatic tax from Fluxo [skip ci]"
+            git push
+            gh workflow run build.yml --ref main
+          fi
