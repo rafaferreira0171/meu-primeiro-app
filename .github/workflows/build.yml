@@ -60,6 +60,17 @@ jobs:
         run: python scripts/patch-ios-login-zoom.py
       - name: Final restore of Finance view components
         run: python scripts/restore-components.py
+      - name: Remove obsolete tax row after final restore
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/main.jsx')
+          s = p.read_text()
+          s = s.replace('<Row label="Imposto" value={fm.tax} auto/>', '')
+          s = s.replace('Prestadores e imposto entram automaticamente. Encerrar preserva o histórico.', 'Prestadores entram automaticamente. Encerrar preserva o histórico.')
+          p.write_text(s)
+          print('Obsolete automatic tax row removed from final Fluxo component.')
+          PY
       - name: Reapply latest Finance features after final restore
         run: |
           python scripts/patch-dashboard-insights.py
@@ -84,8 +95,11 @@ jobs:
           missing = [x for x in required if x not in s]
           if missing:
               raise SystemExit('Missing final Finance features: ' + ', '.join(missing))
+          if 'label="Imposto"' in s or 'Prestadores e imposto entram automaticamente' in s:
+              raise SystemExit('Obsolete automatic tax row is still present in final Fluxo component')
           p.write_text(s)
           print('Final Finance feature set validated:', ', '.join(required))
+          print('Automatic tax row validated as removed.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
