@@ -89,10 +89,12 @@ jobs:
           python scripts/patch-ios-login-zoom.py
       - name: Apply auth-aware data reload after final restore
         run: python scripts/patch-auth-data-reload.py
-      - name: Harden auth startup and clean branding
-        run: python scripts/patch-auth-login-stability.py
-      - name: Restore Finance components after auth patch
+      - name: Final restore before auth hardening
         run: python scripts/restore-components.py
+      - name: Harden auth startup and clean branding after final restore
+        run: python scripts/patch-auth-login-stability.py
+      - name: Reapply Finance assistant after final auth hardening
+        run: python scripts/patch-finance-assistant.py
       - name: Validate final Finance feature set
         run: |
           python - <<'PY'
