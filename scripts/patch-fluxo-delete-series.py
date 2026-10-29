@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 p = Path('src/main.jsx')
 s = p.read_text()
@@ -12,8 +13,11 @@ if old_update_null in s:
     s = s.replace(old_update_null, new_update, 1)
 elif old_update_base in s:
     s = s.replace(old_update_base, new_update, 1)
-elif new_update not in s:
-    raise SystemExit('Fluxo update function pattern not found')
+else:
+    # Be tolerant of harmless formatting differences in the restored source.
+    s, count = re.subn(r'const updateFlux=p=>save\(\{\.\.\.data,fluxo:data\.fluxo\.map\(x=>x\.month===month\?\{\.\.\.x,\.\.\.p\}:x\)\}\);', new_update, s, count=1)
+    if count == 0 and new_update not in s:
+        raise SystemExit('Fluxo update function pattern not found')
 
 # Recreating Salário/VA restores the fixed field and removes fixed-field
 # deletion events from the selected month onward, avoiding duplicates.
