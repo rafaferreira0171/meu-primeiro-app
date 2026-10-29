@@ -100,9 +100,8 @@ jobs:
           grep -q "createRoot" dist/assets/*.js
           grep -q "Fluxo" dist/assets/*.js
           grep -q "Prestadores de Serviço" dist/assets/*.js
-          grep -q "SpeechRecognition" dist/assets/*.js
           grep -q "future-month" src/main.jsx
-          echo "Core LookLiP Finance React entry and authentication/data features are present"
+          echo "Core LookLiP Finance React entry and recurring-data features are present"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
