@@ -26,8 +26,6 @@ jobs:
         run: python scripts/restore-components.py
       - name: Apply provider Fluxo percentage control
         run: python scripts/patch-prestadores-percent.py
-      - name: Apply editable tax field
-        run: python scripts/patch-imposto-editavel.py
       - name: Apply transfer provider option
         run: python scripts/patch-transferencias-prestadores.py
       - name: Apply canonical month selectors
