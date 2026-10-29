@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LookLiP Finance</title>
+</head>
+<body>
+  <script>
+    // GitHub Pages returns this file for auth callback paths that do not exist
+    // as physical files. Send the user back to the SPA while preserving the
+    // Supabase confirmation code/error query and hash.
+    (function () {
+      var base = '/meu-primeiro-app/';
+      var target = base + window.location.search + window.location.hash;
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>
