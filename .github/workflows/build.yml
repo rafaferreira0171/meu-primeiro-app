@@ -134,7 +134,7 @@ jobs:
               raise SystemExit('Budget account delete button is missing')
           if 'function useFinance(session)' not in s or 'loadData(seed)' not in s or '[session?.user?.id]' not in s:
               raise SystemExit('Auth-aware finance data reload is missing')
-          if 'Promise.race([getSession(),timeout])' not in s:
+          if not ('Promise.race(' in s and 'getSession()' in s and 'setTimeout' in s and '5000' in s):
               raise SystemExit('Auth startup timeout protection is missing')
           if 'Conta independente do Base44' in s:
               raise SystemExit('Legacy Base44 branding is still present')
