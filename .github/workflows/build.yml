@@ -87,6 +87,8 @@ jobs:
           python scripts/patch-provider-future-edits.py
           python scripts/patch-recurring-future-rules.py
           python scripts/patch-ios-login-zoom.py
+      - name: Apply auth-aware data reload after final restore
+        run: python scripts/patch-auth-data-reload.py
       - name: Validate final Finance feature set
         run: |
           python - <<'PY'
@@ -115,6 +117,8 @@ jobs:
               raise SystemExit('Transferencias persistence fix is missing')
           if 'removeAccount=' not in s or 'onClick={()=>removeAccount(a.id)}' not in s:
               raise SystemExit('Budget account delete button is missing')
+          if 'function useFinance(session)' not in s or 'loadData(seed)' not in s or '[session?.user?.id]' not in s:
+              raise SystemExit('Auth-aware finance data reload is missing')
           p.write_text(s)
           css = Path('src/styles.css').read_text()
           if '.series-row{' not in css:
@@ -125,6 +129,7 @@ jobs:
           print('Provider Fluxo percentage control validated.')
           print('Transferencias validated to persist using items only.')
           print('Budget account delete button validated.')
+          print('Auth-aware data reload validated.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
