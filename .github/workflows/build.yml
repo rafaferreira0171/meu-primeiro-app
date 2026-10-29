@@ -40,6 +40,8 @@ jobs:
         run: python scripts/patch-mobile-layout.py
       - name: Apply refined visual hierarchy
         run: python scripts/patch-visual-layout.py
+      - name: Apply signup confirmation flow
+        run: python scripts/patch-auth-confirmation.py
       - name: Apply first-access onboarding
         run: python scripts/patch-onboarding.py
       - name: Apply onboarding visual styles
