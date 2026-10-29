@@ -45,6 +45,17 @@ export async function persistData(data) {
   const userId = session.user.id
   const currentMonth = new Date().toISOString().slice(0, 7)
   saveLocal(data, userId)
+
+  // normalizeData creates the standard Budget cards for future planning months
+  // so they can be displayed immediately. Those generated rows are not user
+  // records and some production RLS policies intentionally reject inserts for
+  // future months. Persist current/history defaults and all custom accounts,
+  // but never attempt to insert generated future default cards.
+  const budgetAccountsToPersist = (data.budgetAccounts || []).filter(row => {
+    const isGeneratedDefault = !!row.legacy_key
+    return !isGeneratedDefault || !row.month || row.month <= currentMonth
+  })
+
   await Promise.all([
     upsertUserSettings(userId, { start_month: data.startMonth || currentMonth }),
     upsertRows('fluxo', data.fluxo || [], userId),
@@ -53,7 +64,7 @@ export async function persistData(data) {
     upsertRows('despesa', data.despesas || [], userId),
     upsertRows('gasto', data.gastos || [], userId),
     upsertRows('transferencia', data.transferencias || [], userId),
-    upsertRows('budget_account', data.budgetAccounts || [], userId)
+    upsertRows('budget_account', budgetAccountsToPersist, userId)
   ])
   const cleanupOptions = { preserveHistory: true, fromMonth: currentMonth }
   await Promise.all([
