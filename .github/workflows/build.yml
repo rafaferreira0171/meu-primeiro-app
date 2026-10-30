@@ -98,8 +98,6 @@ jobs:
         run: python scripts/patch-auth-login-stability.py
       - name: Apply Fluxo paid checkbox
         run: python scripts/patch-fluxo-paid-checkbox.py
-      - name: Preserve Fluxo delete buttons with paid checkbox
-        run: python scripts/patch-fluxo-paid-delete-preservation.py
       - name: Guarantee auth timeout in final source
         run: |
           python - <<'PY'
