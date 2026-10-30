@@ -223,4 +223,4 @@ jobs:
         uses: actions/deploy-pages@v4
 
 # Trigger a fresh deployment so the current Finance patches reach Pages.
-# Deployment trigger verification: 2026-10-30
+# Deployment trigger verification: 2026-10-30 18:39
