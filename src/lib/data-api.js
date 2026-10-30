@@ -29,8 +29,27 @@ export async function loadData(fallback) {
   const [rows, settings] = await Promise.all([loadFinanceData(userId), loadUserSettings(userId)])
   const fallbackMonth = new Date().toISOString().slice(0, 7)
   const startMonth = settings?.start_month || await ensureStartMonth(session, fallbackMonth)
+
+  // Budget default cards are intentionally not updated in Supabase because the
+  // production RLS policy is INSERT/DELETE-oriented. Keep their editable budget
+  // values in the user's local, user-scoped snapshot so a refresh does not reset
+  // them to zero. Custom Budget accounts remain fully persisted in Supabase.
+  const local = loadLocal(fallback, userId)
+  const localDefaultBudgets = (local.budgetAccounts || []).filter(row => row.legacy_key)
+  const localBudgetByKey = new Map(localDefaultBudgets.map(row => [`${row.month}:${row.legacy_key}`, row]))
+  const serverBudget = rows.budget_account || []
+  const mergedBudget = serverBudget.map(row => {
+    const localRow = localBudgetByKey.get(`${row.month}:${row.legacy_key}`)
+    return localRow ? { ...row, budget: Number(localRow.budget || 0), ativo: localRow.ativo !== false } : row
+  })
+  const serverBudgetKeys = new Set(serverBudget.filter(row => row.legacy_key).map(row => `${row.month}:${row.legacy_key}`))
+  for (const row of localDefaultBudgets) {
+    const key = `${row.month}:${row.legacy_key}`
+    if (!serverBudgetKeys.has(key)) mergedBudget.push(row)
+  }
+
   if (!settings) await upsertUserSettings(userId, { start_month: startMonth })
-  const data = { ...fallback, startMonth, fluxo: rows.fluxo || [], entradas: rows.entrada || [], prestadores: rows.prestador || rows.empregada || [], despesas: rows.despesa || [], gastos: rows.gasto || [], transferencias: rows.transferencia || [], budgetAccounts: rows.budget_account || [] }
+  const data = { ...fallback, startMonth, fluxo: rows.fluxo || [], entradas: rows.entrada || [], prestadores: rows.prestador || rows.empregada || [], despesas: rows.despesa || [], gastos: rows.gasto || [], transferencias: rows.transferencia || [], budgetAccounts: mergedBudget }
   saveLocal(data, userId)
   return data
 }
@@ -47,9 +66,9 @@ export async function persistData(data) {
   saveLocal(data, userId)
 
   // normalizeData generates the standard Budget cards for planning months.
-  // They are UI defaults, not user-created records. The production RLS policy
-  // intentionally does not allow the client to insert these rows. Custom
-  // Budget accounts have no legacy_key and remain fully persisted.
+  // They are UI defaults, not user-created records. Their editable values are
+  // retained in the user-scoped local snapshot; custom accounts are persisted
+  // normally in Supabase.
   const budgetAccountsToPersist = (data.budgetAccounts || []).filter(row => !row.legacy_key)
 
   await Promise.all([
