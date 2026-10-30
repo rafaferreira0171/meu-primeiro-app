@@ -71,7 +71,6 @@ jobs:
           s = s.replace('<Row label="Imposto" value={fm.tax} auto/>', '')
           s = s.replace('Prestadores e imposto entram automaticamente. Encerrar preserva o histórico.', 'Prestadores entram automaticamente. Encerrar preserva o histórico.')
           p.write_text(s)
-          print('Obsolete automatic tax row removed from final Fluxo component.')
           PY
       - name: Apply Fluxo recurring delete buttons after final restore
         run: |
@@ -95,14 +94,12 @@ jobs:
         run: python scripts/restore-components.py
       - name: Ensure Section component before auth hardening
         run: python scripts/patch-ensure-section.py
-      - name: Reapply Fluxo recurring delete buttons after final auth restore
-        run: |
-          python scripts/patch-fluxo-delete-series.py
-          python scripts/patch-fluxo-delete-series-style.py
+      - name: Harden auth startup and clean branding before Fluxo finalization
+        run: python scripts/patch-auth-login-stability.py
       - name: Apply Fluxo paid checkbox
         run: python scripts/patch-fluxo-paid-checkbox.py
-      - name: Harden auth startup and clean branding after final restore
-        run: python scripts/patch-auth-login-stability.py
+      - name: Preserve Fluxo delete buttons with paid checkbox
+        run: python scripts/patch-fluxo-paid-delete-preservation.py
       - name: Guarantee auth timeout in final source
         run: |
           python - <<'PY'
@@ -172,10 +169,7 @@ jobs:
               raise SystemExit('Fluxo delete button styles are missing')
           if '.paid-check{' not in css:
               raise SystemExit('Fluxo paid checkbox styles are missing')
-          print('Final Finance feature set validated:', ', '.join(required))
-          print('Auth startup timeout validated.')
-          print('Legacy Base44 branding removed.')
-          print('Fluxo paid checkbox validated.')
+          print('Final Finance feature set validated.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -194,18 +188,15 @@ jobs:
           test -d dist/assets
           grep -q "assets/" dist/index.html
           test ! -f dist/sw.js
-          echo "Compiled Vite output verified without legacy service worker"
       - name: Verify React entry is compiled
         run: |
           test -f dist/index.html
           test -d dist/assets
           grep -q "createRoot" dist/assets/*.js
-          echo "Vite build produced the React application bundle"
       - name: Verify Supabase source fallback
         run: |
           grep -q "try" src/lib/supabase.js
           grep -q "supabase = null" src/lib/supabase.js
-          echo "Defensive Supabase initialization is present in source"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -221,6 +212,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Trigger a fresh deployment so the current Finance patches reach Pages.
-# Deployment trigger verification: 2026-10-30 18:39
