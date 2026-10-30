@@ -95,6 +95,8 @@ jobs:
         run: python scripts/restore-components.py
       - name: Ensure Section component before auth hardening
         run: python scripts/patch-ensure-section.py
+      - name: Apply Fluxo paid checkbox
+        run: python scripts/patch-fluxo-paid-checkbox.py
       - name: Harden auth startup and clean branding after final restore
         run: python scripts/patch-auth-login-stability.py
       - name: Guarantee auth timeout in final source
@@ -158,13 +160,18 @@ jobs:
               raise SystemExit('Auth startup timeout protection is missing')
           if 'Conta independente do Base44' in s:
               raise SystemExit('Legacy Base44 branding is still present')
+          if 'paid-check' not in s or 'looklip-fluxo-paid:' not in s:
+              raise SystemExit('Fluxo paid checkbox is missing')
           p.write_text(s)
           css = Path('src/styles.css').read_text()
           if '.series-row{' not in css:
               raise SystemExit('Fluxo delete button styles are missing')
+          if '.paid-check{' not in css:
+              raise SystemExit('Fluxo paid checkbox styles are missing')
           print('Final Finance feature set validated:', ', '.join(required))
           print('Auth startup timeout validated.')
           print('Legacy Base44 branding removed.')
+          print('Fluxo paid checkbox validated.')
           PY
       - name: Setup Node
         uses: actions/setup-node@v4
