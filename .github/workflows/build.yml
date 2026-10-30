@@ -103,6 +103,12 @@ jobs:
         run: python scripts/patch-fluxo-paid-checkbox.py
       - name: Harden auth startup and clean branding after final restore
         run: python scripts/patch-auth-login-stability.py
+      - name: Reapply Fluxo recurring delete buttons after auth hardening
+        run: |
+          python scripts/patch-fluxo-delete-series.py
+          python scripts/patch-fluxo-delete-series-style.py
+      - name: Reapply Fluxo paid checkbox after auth hardening
+        run: python scripts/patch-fluxo-paid-checkbox.py
       - name: Guarantee auth timeout in final source
         run: |
           python - <<'PY'
