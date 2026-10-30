@@ -95,6 +95,10 @@ jobs:
         run: python scripts/restore-components.py
       - name: Ensure Section component before auth hardening
         run: python scripts/patch-ensure-section.py
+      - name: Reapply Fluxo recurring delete buttons after final auth restore
+        run: |
+          python scripts/patch-fluxo-delete-series.py
+          python scripts/patch-fluxo-delete-series-style.py
       - name: Apply Fluxo paid checkbox
         run: python scripts/patch-fluxo-paid-checkbox.py
       - name: Harden auth startup and clean branding after final restore
