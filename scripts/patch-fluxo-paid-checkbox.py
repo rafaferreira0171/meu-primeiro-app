@@ -21,15 +21,26 @@ if 'looklip-fluxo-paid:' not in s:
         raise SystemExit('Fluxo calculation marker not found')
     s = s.replace(marker, paid_state, 1)
 
-# Fixed expense rows only.
-old = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
-new = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>{paidAction(`fixed:${k}`)}'
-if old in s and 'paidAction(`fixed:${k}`)' not in s:
-    s = s.replace(old, new, 1)
+# Fixed expense rows: attach Pago to every field in FLUXO_FIELDS, not just the first matching row.
+fixed_block = re.search(r'(\{FLUXO_FIELDS\.map\(\(\[k,l\]\)=>)(.*?)(\)\}\{custom\.map)', s, re.S)
+if fixed_block:
+    body = fixed_block.group(2)
+    row_pattern = r'(<Row key=\{k\} label=\{l\} value=\{f\[k\]\} onChange=\{v=>updateFlux\(\{\[k\]:v\}\)\})(?!\s*action=)'
+    body2, n = re.subn(row_pattern, r'\1 action={paidAction(`fixed:${k}`)}', body)
+    if n:
+        s = s[:fixed_block.start(2)] + body2 + s[fixed_block.end(2):]
+else:
+    raise SystemExit('FLUXO_FIELDS expense block not found')
 
 # Custom expense rows: every user-created expense gets its own marker.
 old = "{deleteButton('despesas',x)}<span>{x.nome}</span><input type=\"number\" value={Number(x.valor||0)} onChange={e=>updateSeries('despesas',x.id,{valor:Number(e.target.value)||0})}/>"
 new = "{deleteButton('despesas',x)}<span>{x.nome}</span><input type=\"number\" value={Number(x.valor||0)} onChange={e=>updateSeries('despesas',x.id,{valor:Number(e.target.value)||0})}/>{paidAction(`despesa:${x.id}`)}"
+if old in s and 'paidAction(`despesa:${x.id}`)' not in s:
+    s = s.replace(old, new, 1)
+
+# Also support the canonical custom-row shape used by the restored Fluxo component.
+old = "<Row key={x.id} label={x.nome} value={x.valor} onChange={v=>updateSeries('despesas',x.id,{valor:v})} action={<button className=\"ghost\" onClick={()=>stopSeries('despesas',x.series_id||x.id)}>Encerrar</button>}/>"
+new = "<Row key={x.id} label={x.nome} value={x.valor} onChange={v=>updateSeries('despesas',x.id,{valor:v})} action={<>{paidAction(`despesa:${x.id}`)}<button className=\"ghost\" onClick={()=>stopSeries('despesas',x.series_id||x.id)}>Encerrar</button></>}/>"
 if old in s and 'paidAction(`despesa:${x.id}`)' not in s:
     s = s.replace(old, new, 1)
 
@@ -66,4 +77,4 @@ if '.paid-check{' not in css:
     css += '\n.paid-check{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}.paid-check input{width:16px;height:16px;margin:0;accent-color:#1f9d55}.paid-check input:checked+span{color:#1f9d55}\n'
     cssp.write_text(css)
 
-print('Fluxo paid checkbox restricted to expenses and custom expense rows.')
+print('Fluxo paid checkbox applied to every expense row, including all fixed fields, custom expenses, and providers; entries remain unmarked.')
