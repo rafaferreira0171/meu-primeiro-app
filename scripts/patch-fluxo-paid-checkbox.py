@@ -22,7 +22,7 @@ if 'looklip-fluxo-paid:' not in s:
         raise SystemExit('Fluxo calculation marker not found')
     s = s.replace(marker, paid_state, 1)
 
-# Fixed expense rows: append the checkbox to the existing delete-enabled row.
+# Fixed expense rows: append the checkbox to every fixed expense row.
 old = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
 new = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>{paidAction(`fixed:${k}`)}'
 if old in s and 'paidAction(`fixed:${k}`)' not in s:
@@ -40,6 +40,12 @@ new = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto action
 if old in s:
     s = s.replace(old, new, 1)
 
+# Pass the authenticated user id so paid markers remain isolated per account.
+old = '<Fluxo data={data} save={save} month={month} setMonth={setMonth} updateFlux={updateFlux} addSeries={addSeries} updateSeries={updateSeries} stopSeries={stopSeries}/>'
+new = '<Fluxo data={data} save={save} month={month} setMonth={setMonth} updateFlux={updateFlux} addSeries={addSeries} updateSeries={updateSeries} stopSeries={stopSeries} userId={session?.user?.id}/>'
+if old in s:
+    s = s.replace(old, new, 1)
+
 p.write_text(s)
 
 cssp = Path('src/styles.css')
@@ -48,4 +54,4 @@ if '.paid-check{' not in css:
     css += '\n.paid-check{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}.paid-check input{width:16px;height:16px;margin:0;accent-color:#1f9d55}.paid-check input:checked+span{color:#1f9d55}\n'
     cssp.write_text(css)
 
-print('Fluxo paid checkbox applied without replacing recurring-delete controls.')
+print('Fluxo paid checkbox applied to fixed expenses, custom expenses and providers.')
