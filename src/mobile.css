@@ -231,3 +231,57 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
     letter-spacing:.04em;
   }
 }
+
+
+/* Final mobile dashboard card sizing: keep every monthly value inside the viewport. */
+@media(max-width:800px){
+  .dash-content .table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow:visible;
+  }
+  .dash-content .table-wrap table{
+    display:block;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    table-layout:fixed;
+  }
+  .dash-content .table-wrap tbody{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    min-width:0;
+  }
+  .dash-content .table-wrap tr{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  .dash-content .table-wrap td{
+    display:grid;
+    grid-template-columns:minmax(74px,1fr) auto;
+    align-items:center;
+    justify-content:initial;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    gap:8px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-align:right;
+    font-size:11px;
+  }
+  .dash-content .table-wrap td:first-child{
+    display:block;
+    width:100%;
+    min-width:0;
+  }
+  .dash-content .table-wrap td:nth-child(n+2)::before{
+    justify-self:start;
+    min-width:0;
+    white-space:nowrap;
+  }
+}
