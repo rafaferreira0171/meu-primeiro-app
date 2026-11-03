@@ -24,24 +24,45 @@ jobs:
           from pathlib import Path
           p=Path('src/main.jsx')
           s=p.read_text()
-          if 'const fluxoByMonth=new Map();' not in s:
-              needle="const now=currentMonth();"
-              insert="const fluxoByMonth=new Map();for(const row of d.fluxo){const prev=fluxoByMonth.get(row.month);fluxoByMonth.set(row.month,prev?{...prev,...row,id:prev.id||row.id}:row)}d.fluxo=[...fluxoByMonth.values()];"
-              if needle not in s: raise SystemExit('normalizeData marker not found')
-              s=s.replace(needle,insert+needle,1)
+
+          # Fluxo has one database row per month, but every row must also have
+          # its own primary-key id. Future months are copied from the latest
+          # month; never carry that source row's id into the new month.
+          old="d.fluxo.push({...src,month:m})"
+          new="d.fluxo.push({...src,id:crypto.randomUUID(),month:m})"
+          if old in s:
+              s=s.replace(old,new,1)
+
+          # Defensive final normalization: one Fluxo row per month and one
+          # unique primary-key id per row. This does NOT merge expenses/gastos.
+          marker="d.fluxo=d.fluxo.filter(x=>x.month>=d.startMonth);"
+          guard="const fluxoIds=new Set();d.fluxo=d.fluxo.map(row=>{let id=row.id;if(!id||fluxoIds.has(id))id=crypto.randomUUID();fluxoIds.add(id);return {...row,id}});"
+          if guard not in s:
+              if marker not in s: raise SystemExit('Fluxo finalization marker not found')
+              s=s.replace(marker,guard+marker,1)
           p.write_text(s)
 
           q=Path('scripts/patch-finance-assistant.py')
           t=q.read_text()
           if 'let financeRecognizer=null;' not in t:
               t=t.replace("function FinanceAssistant({data,save,month}){", "let financeRecognizer=null;\nfunction FinanceAssistant({data,save,month}){", 1)
+
+          # Reuse one SpeechRecognition instance while the page is alive and
+          # never auto-start voice just by opening the Finance panel. The user
+          # explicitly taps the microphone button to start recognition.
           old_voice="const startVoice=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setMessage('Seu navegador não disponibilizou reconhecimento de voz. Use o campo de texto ou o ditado do teclado.');return}const r=new SR();r.lang='pt-BR';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>setListening(true);r.onend=()=>setListening(false);r.onerror=()=>{setListening(false);setMessage('Não consegui ouvir. Tente novamente.')};r.onresult=e=>{const heard=e.results?.[0]?.[0]?.transcript||'';setText(heard);setTimeout(()=>{const d=parse(heard);if(d?.account){setDraft(d);setMessage('Confira o lançamento antes de confirmar.')}else if(d){setDraft(d);setMessage('Identifiquei o valor, mas não encontrei o Budget. Escolha uma conta abaixo.')}} ,0)};r.start()};"
           new_voice="const startVoice=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setMessage('Seu navegador não disponibilizou reconhecimento de voz. Use o campo de texto ou o ditado do teclado.');return}if(listening)return;setMessage('');let r=financeRecognizer;if(!r){r=new SR();financeRecognizer=r;r.lang='pt-BR';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>setListening(true);r.onend=()=>setListening(false);r.onerror=e=>{setListening(false);if(e?.error!=='aborted')setMessage('Não consegui ouvir. Tente novamente.')};r.onresult=e=>{const heard=e.results?.[0]?.[0]?.transcript||'';setText(heard);setListening(false);const d=parse(heard);if(d?.account){setDraft(d);setMessage('Confira o lançamento antes de confirmar.')}else if(d){setDraft(d);setMessage('Identifiquei o valor, mas não encontrei o Budget. Escolha uma conta abaixo.')}else setMessage('Não identifiquei o valor. Tente novamente.')}}try{r.start()}catch(e){setListening(false)}};"
-          if old_voice in t: t=t.replace(old_voice,new_voice,1)
-          old_open="onClick={()=>{setOpen(true);setMessage('');startVoice()}} aria-label=\"Abrir Finance\""
-          if old_open in t: t=t.replace(old_open,"onClick={()=>{setOpen(true);setText('');setDraft(null);setMessage('')}} aria-label=\"Abrir Finance\"",1)
+          if old_voice in t:
+              t=t.replace(old_voice,new_voice,1)
+
+          # Current version already has the improved voice handler; this also
+          # guarantees the Finance FAB only opens the panel and does not invoke
+          # microphone permission automatically.
+          import re
+          t=re.sub(r'onClick=\{\(\)=>\{setOpen\(true\);setText\(\x27\x27\);setDraft\(null\);setMessage\(\x27\x27\);startVoice\(\)\}\}', "onClick={()=>{setOpen(true);setText('');setDraft(null);setMessage('')}}", t, count=1)
+          t=re.sub(r'onClick=\{\(\)=>\{setOpen\(true\);setMessage\(\x27\x27\);startVoice\(\)\}\}', "onClick={()=>{setOpen(true);setText('');setDraft(null);setMessage('')}}", t, count=1)
           q.write_text(t)
-          print('Fixes applied')
+          print('Finance fixes applied')
           PY
       - name: Commit if changed
         run: |
@@ -49,5 +70,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/main.jsx scripts/patch-finance-assistant.py
-          git commit -m "Fix Fluxo duplicate keys and voice permission UX"
+          git commit -m "Fix Fluxo row IDs and voice permission UX"
           git push
