@@ -32,7 +32,7 @@ function FinanceAssistant({data,save,month,tab}){
     s = s.replace(marker, component + '\n' + marker, 1)
 
 old = "</main>{confirm&&<Modal title={confirm.title}"
-new = "</main><FinanceAssistant data={data} save={save} month={month}/>{confirm&&<Modal title={confirm.title}"
+new = "</main><FinanceAssistant data={data} save={save} month={month} tab={tab}/>{confirm&&<Modal title={confirm.title}"
 if old not in s:
     raise SystemExit('App insertion point not found')
 s = s.replace(old, new, 1)
