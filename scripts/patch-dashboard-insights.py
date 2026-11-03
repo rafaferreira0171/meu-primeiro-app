@@ -28,6 +28,6 @@ rules = '''
 @media(min-width:801px){.dash-content .monthly-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 '''
 if marker not in css:
-    css += '\\n' + rules
+    css += '\n' + rules
 css_path.write_text(css)
 print('Monthly Dashboard converted to responsive summary cards')
