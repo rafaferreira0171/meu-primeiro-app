@@ -116,7 +116,7 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
   }
   /* Monetary values remain available in the monthly table below;
      hiding the tiny duplicate labels prevents them colliding under 12 bars. */
-  .dash-content .dash-trend b{display:none}
+  .dash-content .dash-trend small{display:none}
   .dash-content .dash-trend span{
     font-size:9px;
     line-height:1;
