@@ -31,7 +31,6 @@ if exp_start < 0:
     raise SystemExit('Despesas section not found')
 head, exp = fluxo[:exp_start], fluxo[exp_start:]
 
-# Keep checkbox + Pago + expense name as one inline group.
 old = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
 new = '<span className="paid-inline-name">{paidAction(`fixed:${k}`)}{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
 if old in exp:
@@ -54,6 +53,22 @@ new = '<Fluxo data={data} save={save} month={month} setMonth={setMonth} updateFl
 if old in s:
     s = s.replace(old, new, 1)
 
+# Add a fourth KPI without changing the Fluxo calculation structure.
+kpi_old = '<div className="kpis"><Kpi t="Entradas" v={fm.entries}/><Kpi t="Despesas" v={fm.expenses}/><Kpi t="Saldo" v={fm.balance}/></div>'
+kpi_new = '<div className="kpis fluxo-kpis"><Kpi t="Entradas" v={fm.entries}/><Kpi t="Despesas" v={fm.expenses}/><Kpi t="Saldo" v={fm.balance}/><Kpi t="Total a vencer" v={totalPending}/></div>'
+if kpi_old in s:
+    s = s.replace(kpi_old, kpi_new, 1)
+elif 'Total a vencer' not in s:
+    raise SystemExit('Fluxo KPI block not found')
+
+# Calculate Total a vencer from the same expense rows that have Pago controls.
+pending_marker = 'const fixedExpenses=FLUXO_FIELDS.filter(([k])=>!fixedDeleted(k));return <>'
+pending_new = 'const fixedExpenses=FLUXO_FIELDS.filter(([k])=>!fixedDeleted(k));const pendingFixed=fixedExpenses.reduce((sum,[k])=>sum+(isPaid(`fixed:${k}`)?0:Number(f[k]||0)),0);const pendingCustom=custom.reduce((sum,x)=>sum+(isPaid(`despesa:${x.id}`)?0:Number(x.valor||0)),0);const pendingPrest=isPaid(\'prestadores\')?0:Number(fm.employeeTotal||0);const totalPending=pendingFixed+pendingCustom+pendingPrest;return <>'
+if pending_marker in s:
+    s = s.replace(pending_marker, pending_new, 1)
+elif 'const totalPending=' not in s:
+    raise SystemExit('Fluxo fixed expense marker not found')
+
 p.write_text(s)
 
 cssp = Path('src/styles.css')
@@ -62,12 +77,13 @@ paid_css = r'.paid-check{display:inline-flex;align-items:center;gap:5px;font-siz
 css = re.sub(r'\.paid-check\{[^}]*\}\.paid-check input\{[^}]*\}\.paid-check input:checked\+span\{[^}]*\}(?:\.paid-inline-name\{[^}]*\}\.row>\.paid-check\{[^}]*\}\.row \.paid-check\+span\{[^}]*\})?', paid_css, css)
 if '.paid-check{' not in css:
     css += '\n' + paid_css + '\n'
+css += '\n.fluxo-kpis{grid-template-columns:repeat(4,1fr)}.fluxo-kpis .kpi:nth-child(4){border-top:3px solid #7b8491}@media(max-width:800px){.fluxo-kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.fluxo-kpis{grid-template-columns:repeat(2,1fr)}}\n'
 cssp.write_text(css)
 
 final_fluxo = s[s.find('function Fluxo('):s.find('\nfunction Prestadores(', s.find('function Fluxo('))]
-required = ['paid-check', 'Pago', 'paidAction(`fixed:${k}`)', 'paidAction(`despesa:${x.id}`)', 'paid-inline-name']
+required = ['paid-check', 'Pago', 'paidAction(`fixed:${k}`)', 'paidAction(`despesa:${x.id}`)', 'paid-inline-name', 'Total a vencer', 'totalPending']
 missing = [x for x in required if x not in final_fluxo]
 if missing:
-    raise SystemExit('Fluxo paid UI injection incomplete: ' + ', '.join(missing))
+    raise SystemExit('Fluxo paid/pending UI injection incomplete: ' + ', '.join(missing))
 
-print('Fluxo paid checkbox restored inline before expense names and validated.')
+print('Fluxo paid checkbox and Total a vencer KPI validated.')
