@@ -47,8 +47,8 @@ body{background:#f3f5f8;color:var(--looklip-navy)}
 .kpi{border:1px solid #e5eaf0;border-radius:18px;padding:16px 17px;background:#fff;box-shadow:0 8px 24px rgba(15,22,35,.055)}
 .kpi span{color:#7b8798;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 .kpi strong{color:var(--looklip-navy);font-size:22px;letter-spacing:-.02em}
-.kpi:nth-child(3){background:var(--looklip-navy);border-color:var(--looklip-navy);box-shadow:0 12px 28px rgba(15,22,35,.18)}
-.kpi:nth-child(3) span{color:#9eabbd}
+.kpi:nth-child(3){background:linear-gradient(135deg,#263e60 0%,#35577b 100%);border-color:#263e60;box-shadow:0 12px 28px rgba(38,62,96,.22)}
+.kpi:nth-child(3) span{color:#c0cedf}
 .kpi:nth-child(3) strong{color:#fff;font-size:28px}
 
 /* Stronger income/expense sections: white cards with a clear semantic accent. */
