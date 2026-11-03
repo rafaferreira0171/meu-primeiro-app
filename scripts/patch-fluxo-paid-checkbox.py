@@ -21,29 +21,40 @@ if 'looklip-fluxo-paid:' not in s:
         raise SystemExit('Fluxo calculation marker not found')
     s = s.replace(marker, paid_state, 1)
 
-# Canonical Fluxo fixed-expense rows: attach Pago to every FLUXO_FIELDS item.
-fixed_input = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/></div>)}{custom.map'
-fixed_input_paid = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>{paidAction(`fixed:${k}`)}</div>)}{custom.map'
-if fixed_input in s and 'paidAction(`fixed:${k}`)' not in s:
-    s = s.replace(fixed_input, fixed_input_paid, 1)
-elif 'paidAction(`fixed:${k}`)' not in s:
-    raise SystemExit('Canonical fixed expense rows not found')
+# Fixed expenses: keep the same checkbox/green Pago behavior, but place it
+# immediately before the expense name instead of after the amount.
+fixed_input = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>{paidAction(`fixed:${k}`)}</div>)}{custom.map'
+fixed_input_inline = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/></div>)}{custom.map'
+if fixed_input in s:
+    s = s.replace(fixed_input, fixed_input_inline, 1)
 
-# Canonical custom expense rows: every user-created expense gets Pago.
-custom_input = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/></div>)}<Row label="Prestadores de Serviço"'
-custom_input_paid = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/>{paidAction(`despesa:${x.id}`)}</div>)}<Row label="Prestadores de Serviço"'
-if custom_input in s and 'paidAction(`despesa:${x.id}`)' not in s:
-    s = s.replace(custom_input, custom_input_paid, 1)
+# Insert the paid marker before the fixed expense label. The marker is scoped
+# to the FLUXO_FIELDS map so k is available for the existing payment key.
+fixed_label = '<div className="row"><span>{l}</span>'
+fixed_label_paid = '<div className="row">{paidAction(`fixed:${k}`)}<span>{l}</span>'
+if fixed_label in s and 'fixed:${k}`)}<span>{l}</span>' not in s:
+    s = s.replace(fixed_label, fixed_label_paid, 1)
+
+# Custom expenses: same visual position, immediately before the expense name.
+custom_input = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/>{paidAction(`despesa:${x.id}`)}</div>)}<Row label="Prestadores de Serviço"'
+custom_input_inline = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/></div>)}<Row label="Prestadores de Serviço"'
+if custom_input in s:
+    s = s.replace(custom_input, custom_input_inline, 1)
+
+custom_label = '<div className="row"><span>{x.nome}</span>'
+custom_label_paid = '<div className="row">{paidAction(`despesa:${x.id}`)}<span>{x.nome}</span>'
+if custom_label in s and 'despesa:${x.id}`)}<span>{x.nome}</span>' not in s:
+    s = s.replace(custom_label, custom_label_paid, 1)
 
 # Also support the older Row-based custom expense shape.
 old = '<Row key={x.id} label={x.nome} value={x.valor} onChange={v=>updateSeries(\'despesas\',x.id,{valor:v})} action={<button className="ghost" onClick={()=>stopSeries(\'despesas\',x.series_id||x.id)}>Encerrar</button>}/>'
-new = '<Row key={x.id} label={x.nome} value={x.valor} onChange={v=>updateSeries(\'despesas\',x.id,{valor:v})} action={<>{paidAction(`despesa:${x.id}`)}<button className="ghost" onClick={()=>stopSeries(\'despesas\',x.series_id||x.id)}>Encerrar</button></>}/>'
-if old in s and 'paidAction(`despesa:${x.id}`)' not in s:
+new = '<Row key={x.id} label={<span className="paid-inline-name">{paidAction(`despesa:${x.id}`)}{x.nome}</span>} value={x.valor} onChange={v=>updateSeries(\'despesas\',x.id,{valor:v})} action={<button className="ghost" onClick={()=>stopSeries(\'despesas\',x.series_id||x.id)}>Encerrar</button>}/>'
+if old in s:
     s = s.replace(old, new, 1)
 
-# Prestadores are expenses, so they also get Pago.
-old = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto/>'
-new = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto action={paidAction(\'prestadores\')}/>'
+# Prestadores are expenses, so they also get Pago immediately before the name.
+old = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto action={paidAction(\'prestadores\')}/>'
+new = '<Row label={<span className="paid-inline-name">{paidAction(\'prestadores\')}Prestadores de Serviço</span>} value={fm.employeeTotal} auto/>'
 if old in s:
     s = s.replace(old, new, 1)
 
@@ -72,6 +83,9 @@ cssp = Path('src/styles.css')
 css = cssp.read_text()
 if '.paid-check{' not in css:
     css += '\n.paid-check{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}.paid-check input{width:16px;height:16px;margin:0;accent-color:#1f9d55}.paid-check input:checked+span{color:#1f9d55}\n'
-    cssp.write_text(css)
+else:
+    css = re.sub(r'\.paid-check\{[^}]*\}\.paid-check input\{[^}]*\}\.paid-check input:checked\+span\{[^}]*\}', '.paid-check{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;flex:0 0 auto}.paid-check input{width:13px;height:13px;margin:0;accent-color:#1f9d55}.paid-check input:checked+span{color:#1f9d55}', css)
+css += '\n.paid-inline-name{display:inline-flex;align-items:center;gap:7px}.row>.paid-check{margin-right:2px}.row .paid-check+span{min-width:0}\n'
+cssp.write_text(css)
 
-print('Fluxo paid checkbox applied to every expense row, including all fixed fields, custom expenses, and providers; entries remain unmarked.')
+print('Fluxo paid checkbox moved inline before each expense name and checkbox reduced to 13px.')
