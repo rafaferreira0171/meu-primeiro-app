@@ -150,3 +150,80 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
     background:#f6f8fb;
   }
 }
+
+
+/* Mobile Dash: show the monthly evolution as readable cards, not a clipped table. */
+@media(max-width:800px){
+  .dash-content .dash-trend::before{
+    content:'Deslize para acompanhar os 12 meses  →';
+    flex:0 0 100%;
+    display:block;
+    color:#7b8798;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.02em;
+    padding:0 2px 4px;
+    order:-1;
+  }
+  .dash-content .table-wrap{
+    overflow:visible;
+    border:0;
+    border-radius:0;
+  }
+  .dash-content .table-wrap table{
+    display:block;
+    width:100%;
+    min-width:0;
+    table-layout:auto;
+  }
+  .dash-content .table-wrap thead{display:none}
+  .dash-content .table-wrap tbody{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .dash-content .table-wrap tr{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 12px;
+    padding:11px 13px;
+    border:1px solid #e8edf3;
+    border-radius:13px;
+    background:#fff;
+  }
+  .dash-content .table-wrap td{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+    padding:7px 0;
+    border:0;
+    text-align:right;
+    white-space:nowrap;
+    font-size:11px;
+    background:transparent!important;
+    position:static!important;
+    box-shadow:none!important;
+  }
+  .dash-content .table-wrap td:first-child{
+    grid-column:1/-1;
+    justify-content:flex-start;
+    padding:0 0 8px;
+    margin-bottom:3px;
+    border-bottom:1px solid #edf0f4;
+    color:#25354b;
+    font-size:12px;
+    font-weight:800;
+  }
+  .dash-content .table-wrap td:nth-child(2)::before{content:'Entradas'}
+  .dash-content .table-wrap td:nth-child(3)::before{content:'Despesas'}
+  .dash-content .table-wrap td:nth-child(4)::before{content:'Saldo'}
+  .dash-content .table-wrap td:nth-child(n+2)::before{
+    color:#7b8798;
+    font-size:9px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+}
