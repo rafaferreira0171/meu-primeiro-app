@@ -9,3 +9,21 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 /* LookLiP Finance — soften the primary balance card */
 .kpi:nth-child(3){background:linear-gradient(135deg,#263e60 0%,#35577b 100%)!important;border-color:#263e60!important;box-shadow:0 12px 28px rgba(38,62,96,.22)!important}
 .kpi:nth-child(3) span{color:#c0cedf!important}
+
+
+/* LookLiP Finance — mobile KPI balance and spacing */
+@media(max-width:800px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi:nth-child(3){grid-column:1/-1;order:-1;min-height:104px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#263e60 0%,#35577b 100%);border-color:#263e60;box-shadow:0 12px 28px rgba(38,62,96,.20)}
+  .kpi:nth-child(3) span{color:#c0cedf}
+  .kpi:nth-child(3) strong{color:#fff;font-size:30px}
+  .kpi:nth-child(4){grid-column:1/-1;border-top:3px solid #8a96a7}
+}
+@media(max-width:520px){
+  .kpis{gap:9px;margin-bottom:14px}
+  .kpi{min-height:76px;padding:13px!important;border-radius:16px}
+  .kpi strong{font-size:18px!important}
+  .kpi:nth-child(3){min-height:98px}
+  .kpi:nth-child(3) strong{font-size:29px!important}
+  .kpi:nth-child(4){min-height:68px}
+}
