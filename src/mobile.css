@@ -154,16 +154,20 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 
 /* Mobile Dash: show the monthly evolution as readable cards, not a clipped table. */
 @media(max-width:800px){
-  .dash-content .dash-trend::before{
+  .dash-content .dash-trend{
+    position:relative;
+    padding-top:28px;
+  }
+  .dash-content .dash-trend::after{
     content:'Deslize para acompanhar os 12 meses  →';
-    flex:0 0 100%;
-    display:block;
+    position:absolute;
+    top:2px;
+    left:8px;
     color:#7b8798;
     font-size:10px;
     font-weight:700;
     letter-spacing:.02em;
-    padding:0 2px 4px;
-    order:-1;
+    pointer-events:none;
   }
   .dash-content .table-wrap{
     overflow:visible;
@@ -184,8 +188,8 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
   }
   .dash-content .table-wrap tr{
     display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:0 12px;
+    grid-template-columns:1fr;
+    gap:0;
     padding:11px 13px;
     border:1px solid #e8edf3;
     border-radius:13px;
