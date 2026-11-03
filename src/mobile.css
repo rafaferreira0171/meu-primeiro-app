@@ -93,3 +93,60 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
   .dash-content .budget-trend b{font-size:10px}
   .dash-content .budget-trend small{font-size:8px}
 }
+
+
+/* LookLiP Dash — mobile chart and table readability */
+@media(max-width:800px){
+  .dash-content .dash-trend{
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    padding:16px 8px 8px;
+    border-bottom:0;
+  }
+  .dash-content .dash-trend>div{
+    flex:0 0 48px;
+    min-width:48px;
+    scroll-snap-align:start;
+    justify-content:flex-end;
+    padding-bottom:4px;
+  }
+  /* Monetary values remain available in the monthly table below;
+     hiding the tiny duplicate labels prevents them colliding under 12 bars. */
+  .dash-content .dash-trend b{display:none}
+  .dash-content .dash-trend span{
+    font-size:9px;
+    line-height:1;
+    color:#778397;
+    font-weight:700;
+  }
+  .dash-content .table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    scrollbar-width:thin;
+  }
+  .dash-content .table-wrap table{
+    width:max-content;
+    min-width:520px;
+    table-layout:auto;
+  }
+  .dash-content .table-wrap th:first-child,
+  .dash-content .table-wrap td:first-child{
+    position:sticky;
+    left:0;
+    z-index:1;
+    background:#fff;
+    box-shadow:1px 0 0 #edf0f4;
+  }
+  .dash-content .table-wrap th:first-child{
+    z-index:2;
+    background:#f6f8fb;
+  }
+}
