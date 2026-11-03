@@ -21,57 +21,39 @@ if 'looklip-fluxo-paid:' not in s:
         raise SystemExit('Fluxo calculation marker not found')
     s = s.replace(marker, paid_state, 1)
 
-# Fixed expenses: keep the same checkbox/green Pago behavior, but place it
-# immediately before the expense name instead of after the amount.
-fixed_input = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>{paidAction(`fixed:${k}`)}</div>)}{custom.map'
-fixed_input_inline = '<input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/></div>)}{custom.map'
-if fixed_input in s:
-    s = s.replace(fixed_input, fixed_input_inline, 1)
-
-# Insert the paid marker before the fixed expense label. The marker is scoped
-# to the FLUXO_FIELDS map so k is available for the existing payment key.
-fixed_label = '<div className="row"><span>{l}</span>'
-fixed_label_paid = '<div className="row">{paidAction(`fixed:${k}`)}<span>{l}</span>'
-if fixed_label in s and 'fixed:${k}`)}<span>{l}</span>' not in s:
-    s = s.replace(fixed_label, fixed_label_paid, 1)
-
-# Custom expenses: same visual position, immediately before the expense name.
-custom_input = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/>{paidAction(`despesa:${x.id}`)}</div>)}<Row label="Prestadores de Serviço"'
-custom_input_inline = '<input type="number" value={Number(x.valor||0)} onChange={e=>updateSeries(\'despesas\',x.id,{valor:Number(e.target.value)||0})}/></div>)}<Row label="Prestadores de Serviço"'
-if custom_input in s:
-    s = s.replace(custom_input, custom_input_inline, 1)
-
-custom_label = '<div className="row"><span>{x.nome}</span>'
-custom_label_paid = '<div className="row">{paidAction(`despesa:${x.id}`)}<span>{x.nome}</span>'
-if custom_label in s and 'despesa:${x.id}`)}<span>{x.nome}</span>' not in s:
-    s = s.replace(custom_label, custom_label_paid, 1)
-
-# Also support the older Row-based custom expense shape.
-old = '<Row key={x.id} label={x.nome} value={x.valor} onChange={v=>updateSeries(\'despesas\',x.id,{valor:v})} action={<button className="ghost" onClick={()=>stopSeries(\'despesas\',x.series_id||x.id)}>Encerrar</button>}/>'
-new = '<Row key={x.id} label={<span className="paid-inline-name">{paidAction(`despesa:${x.id}`)}{x.nome}</span>} value={x.valor} onChange={v=>updateSeries(\'despesas\',x.id,{valor:v})} action={<button className="ghost" onClick={()=>stopSeries(\'despesas\',x.series_id||x.id)}>Encerrar</button>}/>'
-if old in s:
-    s = s.replace(old, new, 1)
-
-# Prestadores are expenses, so they also get Pago immediately before the name.
-old = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto action={paidAction(\'prestadores\')}/>'
-new = '<Row label={<span className="paid-inline-name">{paidAction(\'prestadores\')}Prestadores de Serviço</span>} value={fm.employeeTotal} auto/>'
-if old in s:
-    s = s.replace(old, new, 1)
-
-# Never show Pago inside Entradas.
+# Current Fluxo layout uses series-row + delete button before the expense label.
+# Scope replacements to the Despesas section so Entradas never receives Pago.
 fluxo_start = s.find('function Fluxo(')
-fluxo_end = s.find('function Prestadores(', fluxo_start)
-if fluxo_start >= 0 and fluxo_end > fluxo_start:
-    fluxo = s[fluxo_start:fluxo_end]
-    entradas_end = fluxo.find('<Section title="Despesas">')
-    if entradas_end > 0:
-        entradas = fluxo[:entradas_end]
-        entradas = re.sub(r'\s*action=\{paidAction\([^)]*\)\}', '', entradas)
-        entradas = re.sub(r'\s*\{paidAction\([^)]*\}', '', entradas)
-        fluxo = entradas + fluxo[entradas_end:]
-        s = s[:fluxo_start] + fluxo + s[fluxo_end:]
+fluxo_end = s.find('\nfunction Prestadores(', fluxo_start)
+if fluxo_start < 0 or fluxo_end < 0:
+    raise SystemExit('Fluxo boundaries not found')
+fluxo = s[fluxo_start:fluxo_end]
+exp_start = fluxo.find('<Section title="Despesas">')
+if exp_start < 0:
+    raise SystemExit('Despesas section not found')
+head, exp = fluxo[:exp_start], fluxo[exp_start:]
 
-# Pass the authenticated user id so markers remain isolated per account.
+# Fixed expenses.
+old = '<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
+new = '{paidAction(`fixed:${k}`)}<span>{l}</span><input type="number" value={Number(f[k]||0)} onChange={e=>updateFlux({[k]:Number(e.target.value)||0})}/>'
+if old in exp and 'paidAction(`fixed:${k}`)' not in exp:
+    exp = exp.replace(old, new, 1)
+
+# Custom expenses.
+old = "{deleteButton('despesas',x)}<span>{x.nome}</span><input type=\"number\" value={Number(x.valor||0)} onChange={e=>updateSeries('despesas',x.id,{valor:Number(e.target.value)||0})}/>"
+new = "{deleteButton('despesas',x)}{paidAction(`despesa:${x.id}`)}<span>{x.nome}</span><input type=\"number\" value={Number(x.valor||0)} onChange={e=>updateSeries('despesas',x.id,{valor:Number(e.target.value)||0})}/>"
+if old in exp and 'paidAction(`despesa:${x.id}`)' not in exp:
+    exp = exp.replace(old, new, 1)
+
+# Prestadores are also expenses.
+old = '<Row label="Prestadores de Serviço" value={fm.employeeTotal} auto/>'
+new = '<Row label={<span className="paid-inline-name">{paidAction(\'prestadores\')}Prestadores de Serviço</span>} value={fm.employeeTotal} auto/>'
+if old in exp:
+    exp = exp.replace(old, new, 1)
+
+s = s[:fluxo_start] + head + exp + s[fluxo_end:]
+
+# Ensure the authenticated user id is passed to Fluxo.
 old = '<Fluxo data={data} save={save} month={month} setMonth={setMonth} updateFlux={updateFlux} addSeries={addSeries} updateSeries={updateSeries} stopSeries={stopSeries}/>'
 new = '<Fluxo data={data} save={save} month={month} setMonth={setMonth} updateFlux={updateFlux} addSeries={addSeries} updateSeries={updateSeries} stopSeries={stopSeries} userId={session?.user?.id}/>'
 if old in s:
@@ -88,4 +70,12 @@ else:
 css += '\n.paid-inline-name{display:inline-flex;align-items:center;gap:7px}.row>.paid-check{margin-right:2px}.row .paid-check+span{min-width:0}\n'
 cssp.write_text(css)
 
-print('Fluxo paid checkbox moved inline before each expense name and checkbox reduced to 13px.')
+# Strong validation: if the current JSX layout changes again, fail the build
+# instead of silently shipping a version where the Pago control disappeared.
+final_fluxo = s[s.find('function Fluxo('):s.find('\nfunction Prestadores(', s.find('function Fluxo('))]
+required = ['paid-check', 'Pago', 'paidAction(`fixed:${k}`)', 'paidAction(`despesa:${x.id}`)']
+missing = [x for x in required if x not in final_fluxo]
+if missing:
+    raise SystemExit('Fluxo paid UI injection incomplete: ' + ', '.join(missing))
+
+print('Fluxo paid checkbox restored inline before expense names and validated.')
