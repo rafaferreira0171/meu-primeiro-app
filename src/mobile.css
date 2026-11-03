@@ -27,3 +27,69 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
   .kpi:nth-child(3) strong{font-size:29px!important}
   .kpi:nth-child(4){min-height:68px}
 }
+
+
+/* LookLiP Dash — executive visual polish */
+.dash-content{display:flex;flex-direction:column;gap:2px}
+.dash-content>.kpis{align-items:stretch}
+.dash-content>.kpis>.kpi{position:relative;overflow:hidden;min-width:0}
+.dash-content>.kpis>.kpi:nth-child(1){border-top:3px solid #4a9b76}
+.dash-content>.kpis>.kpi:nth-child(2){border-top:3px solid #d66a6a}
+.dash-content>.kpis>.kpi:nth-child(3){background:linear-gradient(135deg,#263e60 0%,#35577b 100%);border-color:#263e60;box-shadow:0 12px 28px rgba(38,62,96,.18)}
+.dash-content>.kpis>.kpi:nth-child(3) span{color:#c0cedf}
+.dash-content>.kpis>.kpi:nth-child(3) strong{color:#fff}
+.dash-content>.kpis>.kpi:nth-child(4){border-top:3px solid #8995a6}
+.dash-content>.grid2{align-items:stretch;gap:14px}
+.dash-content>.grid2>.card{height:100%;margin-bottom:14px}
+.dash-content .dash-insight{padding:13px 2px;border-bottom:1px solid #edf0f4}
+.dash-content .dash-insight:last-child{border-bottom:0}
+.dash-content .dash-insight>b{font-size:10px;letter-spacing:.07em;color:#7b8798}
+.dash-content .dash-insight>span{font-size:12px;line-height:1.5;color:#4b5668}
+.dash-content .dash-insight strong{color:#18263a;font-weight:800}
+.dash-content .dash-ranking>div{gap:12px;padding:13px 2px}
+.dash-content .dash-ranking>div>span{min-width:0;font-size:12px}
+.dash-content .dash-ranking>div>span>b{flex:0 0 25px}
+.dash-content .dash-ranking>div>strong{font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dash-content>.card{border-radius:20px}
+.dash-content .dash-trend{gap:8px;padding:16px 4px 0;overflow-x:auto;scrollbar-width:thin}
+.dash-content .dash-trend>div{min-width:0}
+.dash-content .dash-trend i{background:linear-gradient(180deg,#31aaa5 0%,#3972e8 100%);max-width:34px}
+.dash-content .dash-trend>div.negative i{background:#d66a6a}
+.dash-content .dash-trend small{font-size:9px;font-weight:700;font-variant-numeric:tabular-nums}
+.dash-content .table-wrap{border:1px solid #edf0f4;border-radius:13px;overflow-x:auto}
+.dash-content table{border-collapse:separate;border-spacing:0;width:100%}
+.dash-content th{background:#f6f8fb;color:#778397;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:12px 10px;text-align:right}
+.dash-content th:first-child,.dash-content td:first-child{text-align:left}
+.dash-content td{padding:12px 10px;border-top:1px solid #edf0f4;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dash-content tbody tr:hover{background:#f8fafc}
+.dash-content td:last-child{font-weight:800}
+.dash-content td.negative{color:#c64f56!important}
+.dash-content .budget-trend>div{grid-template-columns:minmax(76px,.7fr) minmax(0,1.5fr);gap:12px}
+.dash-content .budget-trend>div>div{min-width:0}
+.dash-content .budget-trend i{background:linear-gradient(90deg,#159b98,#3972e8);opacity:.22}
+.dash-content .budget-trend small{white-space:nowrap}
+@media(max-width:800px){
+  .dash-content{gap:0}
+  .dash-content>.kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px;margin-bottom:13px}
+  .dash-content>.kpis>.kpi{padding:12px!important;border-radius:15px}
+  .dash-content>.kpis>.kpi:nth-child(3){grid-column:1/-1;order:-1;min-height:94px;display:flex;flex-direction:column;justify-content:center}
+  .dash-content>.kpis>.kpi:nth-child(3) strong{font-size:28px!important}
+  .dash-content>.grid2{grid-template-columns:1fr;gap:0}
+  .dash-content>.grid2>.card{margin-bottom:12px;padding:16px}
+  .dash-content>.card{padding:16px;margin-bottom:12px}
+  .dash-content .dash-trend{height:190px;gap:7px}
+  .dash-content .dash-trend>div{min-width:42px}
+  .dash-content .dash-trend small{font-size:8px}
+  .dash-content .table-wrap table{min-width:460px}
+}
+@media(max-width:520px){
+  .dash-content>.kpis>.kpi{min-height:72px}
+  .dash-content>.kpis>.kpi:nth-child(3){min-height:90px}
+  .dash-content .dash-insight{padding:11px 1px}
+  .dash-content .dash-ranking>div{padding:11px 1px}
+  .dash-content .dash-trend{height:176px}
+  .dash-content .budget-trend>div{grid-template-columns:76px minmax(0,1fr);gap:8px}
+  .dash-content .budget-trend>div>div{padding:0 7px}
+  .dash-content .budget-trend b{font-size:10px}
+  .dash-content .budget-trend small{font-size:8px}
+}
