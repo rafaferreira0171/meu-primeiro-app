@@ -14,6 +14,18 @@ if start >= 0:
     s = s[:start] + '''<Section title="Visão Mensal (12 meses)"><div className="monthly-cards">{rows.map(x=>{const scale=Math.max(x.entries,x.expenses,1);const monthName=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][Number(x.m.slice(5,7))-1]||x.m;return <article className="monthly-card monthly-card-v2" key={x.m}><div className="monthly-card-head"><h3>{monthName}/{x.m.slice(0,4)}</h3><span>Projetado</span></div><div className="monthly-metric"><span>Entradas</span><div className="monthly-track"><i className="monthly-income" style={{width:`${Math.max(0,Math.min(100,x.entries/scale*100))}%`}}/></div><strong>{BRL(x.entries)}</strong></div><div className="monthly-metric"><span>Despesas</span><div className="monthly-track"><i className="monthly-expense" style={{width:`${Math.max(0,Math.min(100,x.expenses/scale*100))}%`}}/></div><strong>{BRL(x.expenses)}</strong></div><div className={`monthly-balance ${x.balance<0?'is-negative':'is-positive'}`}><span>Saldo</span><strong>{BRL(x.balance)}</strong></div></article>})}</div></Section>''' + s[end:]
 elif 'monthly-card-v2' not in s:
     raise SystemExit('Monthly dashboard section was not found; refusing to continue')
+
+# Replace only the negative-month count KPI with a compact detailed card.
+s = s.replace(
+    'negative=rows.filter(x=>x.balance<0).length',
+    'negativeRows=rows.filter(x=>x.balance<0),negative=negativeRows.length'
+)
+old_negative = '<div className="kpis dash-negative-kpis"><Kpi t="Meses negativos" v={negative} kind="count"/></div>'
+new_negative = '''<Section title="Meses Negativos"><div className="negative-months-card"><div className="negative-months-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3 10h18"/></svg><strong>{negative} {negative===1?'mês':'meses'}</strong></div>{negativeRows.length?negativeRows.map(x=>{const label=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][Number(x.m.slice(5,7))-1]+'/'+x.m.slice(0,4);return <div className="negative-month-row" key={x.m}><span>{label}</span><b>{BRL(x.balance)}</b></div>}):<div className="negative-month-empty">Nenhum mês com saldo negativo no período projetado.</div>}</div></Section>'''
+if old_negative in s:
+    s = s.replace(old_negative, new_negative, 1)
+elif 'className="negative-months-card"' not in s:
+    raise SystemExit('Negative-month KPI target not found; refusing to continue')
 p.write_text(s)
 
 css_path = Path('src/mobile.css')
