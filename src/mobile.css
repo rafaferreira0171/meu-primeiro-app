@@ -395,3 +395,19 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-content .negative-month-row span{color:#273449;font-size:12px;font-weight:750}
 .dash-content .negative-month-row b{color:#c73535;font-size:13px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dash-content .negative-month-empty{padding:12px;border-radius:10px;background:#f4f8f6;color:#567366;font-size:12px}
+
+
+/* LookLiP Dash projected balance line chart */
+.dash-content .balance-evolution-card{display:flex;flex-direction:column;gap:12px;min-width:0}
+.dash-content .balance-evolution-total{display:flex;flex-direction:column;gap:5px;padding:14px;border-radius:14px;background:#e9f7ef}
+.dash-content .balance-evolution-total span{color:#49675a;font-size:11px;font-weight:700}
+.dash-content .balance-evolution-total strong{color:#176b4d;font-size:25px;font-weight:850;font-variant-numeric:tabular-nums}
+.dash-content .balance-evolution-extremes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dash-content .balance-extreme{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:11px;border-radius:12px;background:#f4f7fa;min-width:0}
+.dash-content .balance-extreme span{font-size:10px;color:#657386;font-weight:700}
+.dash-content .balance-extreme b{font-size:11px;color:#243247}
+.dash-content .balance-extreme strong{font-size:12px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dash-content .balance-extreme.best strong{color:#176b4d}
+.dash-content .balance-extreme.worst strong{color:#c73535}
+.dash-content .balance-line-chart{width:100%;min-width:0;overflow:hidden;padding:8px 0 0}
+.dash-content .balance-line-chart svg{display:block;width:100%;height:auto;overflow:visible}
