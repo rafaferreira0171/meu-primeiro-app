@@ -336,3 +336,13 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-content>.dash-negative-kpis>.kpi{border-top:3px solid #8993a1!important;box-shadow:0 10px 28px rgba(91,103,119,.12)!important}
 /* Dash > Budget: warm ochre accent for the Realizado KPI */
 .dash-content>.dash-budget-kpis>.kpi:nth-child(2){border-top:3px solid #c5a15b!important;box-shadow:0 10px 28px rgba(197,161,91,.17)!important}
+
+
+/* Modern line icon navigation */
+.app nav.app-tabs{align-items:stretch;gap:5px}
+.app nav.app-tabs button{display:flex;align-items:center;justify-content:center;gap:8px;color:#788597;background:transparent;box-shadow:none;font-size:13px;font-weight:650}
+.app nav.app-tabs button svg{width:21px;height:21px;flex:0 0 21px;stroke-width:1.8;transition:color .18s ease,transform .18s ease}
+.app nav.app-tabs button.active{background:#e8f6f4;color:#078b87;box-shadow:none}
+.app nav.app-tabs button.active svg{color:#078b87;transform:translateY(-1px)}
+.app nav.app-tabs button:hover:not(.active){background:#f5f7fa;color:#46546a}
+@media(max-width:800px){.app nav.app-tabs{gap:2px}.app nav.app-tabs button{gap:4px;font-size:10px}.app nav.app-tabs button svg{width:22px;height:22px;flex-basis:22px}.app nav.app-tabs button span{display:block;line-height:1.2}}
