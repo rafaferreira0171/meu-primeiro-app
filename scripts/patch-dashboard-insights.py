@@ -5,12 +5,15 @@ s = p.read_text()
 
 # The Dashboard component is restored earlier in the build. Convert its
 # narrow monthly table into explicit, full-width mobile-friendly summary cards.
-old = '''<Section title="Visão Mensal (12 meses)"><div className="monthly-cards">{rows.map(x=>{const scale=Math.max(x.entries,x.expenses,1);const monthName=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][Number(x.m.slice(5,7))-1]||x.m;return <article className="monthly-card monthly-card-v2" key={x.m}><div className="monthly-card-head"><h3>{monthName}/{x.m.slice(0,4)}</h3><span>Projetado</span></div><div className="monthly-metric"><span>Entradas</span><div className="monthly-track"><i className="monthly-income" style={{width:`${Math.max(0,Math.min(100,x.entries/scale*100))}%`}}/></div><strong>{BRL(x.entries)}</strong></div><div className="monthly-metric"><span>Despesas</span><div className="monthly-track"><i className="monthly-expense" style={{width:`${Math.max(0,Math.min(100,x.expenses/scale*100))}%`}}/></div><strong>{BRL(x.expenses)}</strong></div><div className={`monthly-balance ${x.balance<0?'is-negative':'is-positive'}`}><span>Saldo</span><strong>{BRL(x.balance)}</strong></div></article>})}</div></Section>'''
-new = '''<Section title="Visão mensal"><div className="monthly-cards">{rows.map(x=><article className="monthly-card" key={x.m}><h3>{x.m}</h3><div className="monthly-card-row"><span>Entradas</span><strong>{BRL(x.entries)}</strong></div><div className="monthly-card-row"><span>Despesas</span><strong>{BRL(x.expenses)}</strong></div><div className="monthly-card-row"><span>Saldo</span><strong className={x.balance<0?'negative':''}>{BRL(x.balance)}</strong></div></article>)}</div></Section>'''
-if old in s:
-    s = s.replace(old, new, 1)
-elif 'className="monthly-cards"' not in s:
-    raise SystemExit('Monthly dashboard table target was not found; refusing to claim the layout was fixed')
+start = s.find('<Section title="Visão mensal">')
+if start >= 0:
+    end = s.find('</Section>', start)
+    if end < 0:
+        raise SystemExit('Monthly dashboard section is incomplete')
+    end += len('</Section>')
+    s = s[:start] + '''<Section title="Visão Mensal (12 meses)"><div className="monthly-cards">{rows.map(x=>{const scale=Math.max(x.entries,x.expenses,1);const monthName=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][Number(x.m.slice(5,7))-1]||x.m;return <article className="monthly-card monthly-card-v2" key={x.m}><div className="monthly-card-head"><h3>{monthName}/{x.m.slice(0,4)}</h3><span>Projetado</span></div><div className="monthly-metric"><span>Entradas</span><div className="monthly-track"><i className="monthly-income" style={{width:`\${Math.max(0,Math.min(100,x.entries/scale*100))}%`}}/></div><strong>{BRL(x.entries)}</strong></div><div className="monthly-metric"><span>Despesas</span><div className="monthly-track"><i className="monthly-expense" style={{width:`\${Math.max(0,Math.min(100,x.expenses/scale*100))}%`}}/></div><strong>{BRL(x.expenses)}</strong></div><div className={`monthly-balance \${x.balance<0?'is-negative':'is-positive'}`}><span>Saldo</span><strong>{BRL(x.balance)}</strong></div></article>})}</div></Section>''' + s[end:]
+elif 'monthly-card-v2' not in s:
+    raise SystemExit('Monthly dashboard section was not found; refusing to continue')
 p.write_text(s)
 
 css_path = Path('src/mobile.css')
