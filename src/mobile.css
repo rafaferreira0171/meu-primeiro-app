@@ -411,3 +411,21 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-content .balance-extreme.worst strong{color:#c73535}
 .dash-content .balance-line-chart{width:100%;min-width:0;overflow:hidden;padding:8px 0 0}
 .dash-content .balance-line-chart svg{display:block;width:100%;height:auto;overflow:visible}
+
+
+/* LookLiP Dash Top 5 projected expenses */
+.dash-content .expense-top-five{display:flex;flex-direction:column;min-width:0}
+.dash-content .expense-top-row{display:grid;grid-template-columns:27px 28px minmax(0,1fr) minmax(88px,auto) 43px;align-items:center;gap:8px;min-width:0;padding:11px 0;border-bottom:1px solid #edf0f4}
+.dash-content .expense-top-row:last-child{border-bottom:0;padding-bottom:2px}
+.dash-content .expense-rank{display:flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:#e8edf2;color:#435268;font-size:12px;font-weight:850}
+.dash-content .expense-rank.rank-1{background:#e5a000;color:#fff}
+.dash-content .expense-rank.rank-2{background:#aab5c0;color:#fff}
+.dash-content .expense-rank.rank-3{background:#c77a32;color:#fff}
+.dash-content .expense-symbol{display:flex;align-items:center;justify-content:center;color:#52647a;font-size:22px;font-weight:700}
+.dash-content .expense-detail{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dash-content .expense-detail>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#26364b;font-size:12px;font-weight:750}
+.dash-content .expense-track{height:9px;width:100%;background:#e9edf2;border-radius:999px;overflow:hidden}
+.dash-content .expense-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#d9a11b,#efb52b)}
+.dash-content .expense-value{color:#172235;font-size:11px;font-weight:800;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dash-content .expense-share{justify-self:end;min-width:39px;padding:5px 6px;border-radius:999px;background:#edf1f5;color:#34445a;text-align:center;font-size:10px;font-weight:800}
+@media(max-width:390px){.dash-content .expense-top-row{grid-template-columns:23px 22px minmax(0,1fr) minmax(78px,auto) 38px;gap:5px}.dash-content .expense-rank{width:22px;height:22px;font-size:10px}.dash-content .expense-symbol{font-size:18px}.dash-content .expense-detail>strong{font-size:11px}.dash-content .expense-value{font-size:10px}.dash-content .expense-share{min-width:34px;font-size:9px}}
