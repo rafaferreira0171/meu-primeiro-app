@@ -429,3 +429,35 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-content .expense-value{color:#172235;font-size:11px;font-weight:800;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .dash-content .expense-share{justify-self:end;min-width:39px;padding:5px 6px;border-radius:999px;background:#edf1f5;color:#34445a;text-align:center;font-size:10px;font-weight:800}
 @media(max-width:390px){.dash-content .expense-top-row{grid-template-columns:23px 22px minmax(0,1fr) minmax(78px,auto) 38px;gap:5px}.dash-content .expense-rank{width:22px;height:22px;font-size:10px}.dash-content .expense-symbol{font-size:18px}.dash-content .expense-detail>strong{font-size:11px}.dash-content .expense-value{font-size:10px}.dash-content .expense-share{min-width:34px;font-size:9px}}
+
+
+/* LookLiP Dash executive reading card */
+.dash-content .executive-reading-card{width:100%;box-sizing:border-box;padding:15px 14px;border-radius:17px;background:linear-gradient(135deg,#263d58 0%,#20364f 100%);color:#fff;box-shadow:0 8px 22px rgba(30,52,76,.18);margin:0 0 13px}
+.dash-content .executive-reading-title{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dash-content .executive-reading-title svg{width:23px;height:23px;fill:none;stroke:#f0c42d;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.dash-content .executive-reading-title>strong{font-size:15px;font-weight:850;color:#fff}
+.dash-content .executive-reading-title>span{margin-left:auto;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);color:#d7e1ec;font-size:9px;font-weight:700}
+.dash-content .executive-reading-body{display:grid;grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);gap:10px;align-items:center}
+.dash-content .executive-reading-summary{display:flex;flex-direction:column;gap:9px;min-width:0}
+.dash-content .executive-reading-line{display:flex;align-items:center;gap:7px;min-width:0;color:#f4f7fb;font-size:10px;line-height:1.3}
+.dash-content .exec-status{display:flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;border-radius:50%;font-size:13px;font-style:normal;font-weight:900}
+.dash-content .exec-status.positive{background:#159b78;color:#fff}
+.dash-content .exec-status.negative{background:#e35d62;color:#fff}
+.dash-content .executive-reading-total{display:flex;align-items:center;gap:7px;min-width:0;color:#dce6f0;font-size:10px;line-height:1.35}
+.dash-content .executive-reading-total>span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dash-content .executive-reading-total strong{color:#fff;font-size:16px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dash-content .exec-bars{display:flex;align-items:flex-end;gap:2px;flex:0 0 20px;height:20px}
+.dash-content .exec-bars b{display:block;width:5px;border-radius:2px 2px 0 0;background:#83c9e8}
+.dash-content .exec-bars b:nth-child(1){height:8px}.dash-content .exec-bars b:nth-child(2){height:14px}.dash-content .exec-bars b:nth-child(3){height:19px}
+.dash-content .executive-reading-divider{width:1px;height:100%;min-height:92px;background:rgba(221,232,244,.35)}
+.dash-content .executive-reading-extremes{display:flex;flex-direction:column;gap:12px;min-width:0}
+.dash-content .executive-reading-extreme{display:flex;align-items:center;gap:7px;min-width:0}
+.dash-content .exec-calendar{flex:0 0 20px;color:#53c49a;font-size:21px;font-style:normal;line-height:1}
+.dash-content .executive-reading-extreme.worst .exec-calendar{color:#ef777b}
+.dash-content .executive-reading-extreme>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.dash-content .executive-reading-extreme small{color:#d9e3ed;font-size:9px}
+.dash-content .executive-reading-extreme b{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:5px 7px;border-radius:8px;background:#e7f7ee;color:#26384b;font-size:10px;font-weight:800}
+.dash-content .executive-reading-extreme b strong{color:#176b4d;font-size:10px;font-weight:900;white-space:nowrap}
+.dash-content .executive-reading-extreme.worst b{background:#fff0ef}
+.dash-content .executive-reading-extreme.worst b strong{color:#c73535}
+@media(max-width:390px){.dash-content .executive-reading-card{padding:13px 11px}.dash-content .executive-reading-body{gap:7px}.dash-content .executive-reading-line,.dash-content .executive-reading-total{font-size:9px}.dash-content .executive-reading-total strong{font-size:14px}.dash-content .executive-reading-extreme b{font-size:9px}.dash-content .executive-reading-extreme b strong{font-size:9px}}
