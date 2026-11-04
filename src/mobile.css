@@ -346,3 +346,17 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .app nav.app-tabs button.active svg{color:#078b87;transform:translateY(-1px)}
 .app nav.app-tabs button:hover:not(.active){background:#f5f7fa;color:#46546a}
 @media(max-width:800px){.app nav.app-tabs{gap:2px}.app nav.app-tabs button{gap:4px;font-size:10px}.app nav.app-tabs button svg{width:22px;height:22px;flex-basis:22px}.app nav.app-tabs button span{display:block;line-height:1.2}}
+
+
+/* Semantic colors for each navigation icon; selected tab keeps the green halo */
+.app nav.app-tabs button:nth-child(1) svg{color:#2f9b79}
+.app nav.app-tabs button:nth-child(2) svg{color:#8993a1}
+.app nav.app-tabs button:nth-child(3) svg{color:#4386bd}
+.app nav.app-tabs button:nth-child(4) svg{color:#c5a15b}
+.app nav.app-tabs button:nth-child(5) svg{color:inherit}
+.app nav.app-tabs button.active{background:#e8f6f4;color:#078b87;box-shadow:0 5px 15px rgba(47,155,121,.13)}
+.app nav.app-tabs button.active svg{transform:translateY(-1px)}
+.app nav.app-tabs button.active:nth-child(1) svg{color:#2f9b79}
+.app nav.app-tabs button.active:nth-child(2) svg{color:#8993a1}
+.app nav.app-tabs button.active:nth-child(3) svg{color:#4386bd}
+.app nav.app-tabs button.active:nth-child(4) svg{color:#c5a15b}
