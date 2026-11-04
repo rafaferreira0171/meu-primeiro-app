@@ -285,3 +285,22 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
     white-space:nowrap;
   }
 }
+
+
+/* Dashboard flow composition donut */
+.dash-flow-composition{display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;padding:12px 4px 8px}
+.dash-flow-donut{position:relative;width:190px;height:190px;flex:0 0 190px}
+.dash-flow-donut svg{display:block;width:100%;height:100%;overflow:visible}
+.dash-flow-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:25px}
+.dash-flow-center small{font-size:10px;font-weight:800;letter-spacing:.13em;color:#8290a3}
+.dash-flow-center strong{font-size:16px;font-weight:800;color:#172235;white-space:nowrap}
+.dash-flow-center strong.negative{color:#d94f55}
+.dash-flow-legend{display:grid;gap:18px;min-width:190px;flex:1}
+.dash-flow-legend>div{display:flex;align-items:flex-start;gap:11px}
+.dash-flow-legend>div>i{width:11px;height:11px;border-radius:50%;flex:0 0 11px;margin-top:4px}
+.dash-flow-legend .income-dot{background:#2f9b79}
+.dash-flow-legend .expense-dot{background:#d85d62}
+.dash-flow-legend span{display:grid;gap:3px;color:#7b8798;font-size:12px}
+.dash-flow-legend b{color:#172235;font-size:17px;font-weight:800}
+.dash-flow-legend small{font-size:11px;color:#8994a4}
+@media(max-width:480px){.dash-flow-composition{gap:18px}.dash-flow-donut{width:164px;height:164px;flex-basis:164px}.dash-flow-legend{min-width:150px}}
