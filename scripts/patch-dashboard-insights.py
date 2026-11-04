@@ -38,6 +38,14 @@ if trend_start >= 0:
     s = s[:trend_start] + trend_markup + s[trend_end:]
 elif 'className="balance-line-chart"' not in s:
     raise SystemExit('Balance evolution section not found; refusing to continue')
+
+# Render only the five largest projected expense categories, in descending order.
+old_top = '<Section title="Maiores despesas"><div className="dash-ranking">{top.map(([name,value],i)=><div key={name}><span><b>{i+1}</b>{name}</span><strong>{BRL(value)}</strong></div>)}</div>{!top.length&&<div className="empty">Nenhuma despesa registrada.</div>}</Section>'
+new_top = '<Section title="Maiores Despesas (Top 5 · Projetadas)"><div className="expense-top-five">{top.slice(0,5).map(([name,value],i)=>{const pct=allExp?value/allExp*100:0,bar=top[0]&&top[0][1]?value/top[0][1]*100:0,lower=name.toLowerCase(),symbol=lower.includes("moradia")||lower.includes("aluguel")?"⌂":lower.includes("alimenta")||lower.includes("mercado")?"♜":lower.includes("transporte")||lower.includes("combust")?"⌁":lower.includes("saúde")||lower.includes("saude")?"♡":"•••";return <div className="expense-top-row" key={name}><b className={"expense-rank rank-"+(i+1)}>{i+1}</b><span className="expense-symbol">{symbol}</span><div className="expense-detail"><strong>{name}</strong><div className="expense-track"><i style={{width:bar+"%"}}/></div></div><strong className="expense-value">{BRL(value)}</strong><b className="expense-share">{pct.toFixed(0)}%</b></div>})}</div>{!top.length&&<div className="empty">Nenhuma despesa registrada.</div>}</Section>'
+if old_top in s:
+    s = s.replace(old_top, new_top, 1)
+elif 'className="expense-top-five"' not in s:
+    raise SystemExit('Largest-expenses section not found; refusing to continue')
 p.write_text(s)
 
 css_path = Path('src/mobile.css')
