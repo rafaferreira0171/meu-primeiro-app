@@ -384,3 +384,14 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-content .monthly-balance.is-negative strong{color:#c94343}
 @media(min-width:801px){.dash-content .monthly-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:380px){.dash-content .monthly-metric{grid-template-columns:56px minmax(35px,1fr) minmax(84px,auto);gap:6px}.dash-content .monthly-metric>strong{font-size:10px}}
+\n
+/* LookLiP Dash negative months card */
+.dash-content .negative-months-card{display:flex;flex-direction:column;gap:9px;min-width:0}
+.dash-content .negative-months-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px}
+.dash-content .negative-months-heading svg{width:25px;height:25px;fill:none;stroke:#d94b4b;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.dash-content .negative-months-heading strong{padding:5px 11px;border-radius:999px;background:#fde8e8;color:#c73535;font-size:11px;font-weight:800}
+.dash-content .negative-month-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;overflow:hidden;padding:10px 12px 10px 15px;border-radius:11px;background:#fff0f0}
+.dash-content .negative-month-row:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#e45b60;border-radius:11px 0 0 11px}
+.dash-content .negative-month-row span{color:#273449;font-size:12px;font-weight:750}
+.dash-content .negative-month-row b{color:#c73535;font-size:13px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dash-content .negative-month-empty{padding:12px;border-radius:10px;background:#f4f8f6;color:#567366;font-size:12px}
