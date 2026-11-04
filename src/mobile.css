@@ -304,3 +304,17 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-flow-legend b{color:#172235;font-size:17px;font-weight:800}
 .dash-flow-legend small{font-size:11px;color:#8994a4}
 @media(max-width:480px){.dash-flow-composition{gap:18px}.dash-flow-donut{width:164px;height:164px;flex-basis:164px}.dash-flow-legend{min-width:150px}}
+
+
+/* Donut chart external callout leaders */
+.dash-flow-composition{gap:18px}
+.dash-flow-legend{gap:22px;padding-left:14px}
+.dash-flow-legend>div{position:relative}
+.dash-flow-legend>div>i{width:24px;height:2px;border-radius:2px;flex:0 0 24px;margin:8px 0 0 -25px;position:relative}
+.dash-flow-legend .income-dot{background:#2f9b79;transform:rotate(-18deg);transform-origin:right center}
+.dash-flow-legend .expense-dot{background:#d85d62;transform:rotate(18deg);transform-origin:right center}
+.dash-flow-legend span{gap:4px}
+.dash-flow-legend span:after{content:"";display:block;width:100%;height:1px;background:#edf0f4;margin-top:5px}
+.dash-flow-legend b{font-size:18px}
+.dash-flow-legend small{font-size:11px;line-height:1.35}
+@media(max-width:480px){.dash-flow-composition{gap:10px}.dash-flow-donut{width:158px;height:158px;flex-basis:158px}.dash-flow-legend{min-width:130px;padding-left:8px}.dash-flow-legend>div>i{width:17px;flex-basis:17px;margin-left:-19px}.dash-flow-legend b{font-size:15px}}
