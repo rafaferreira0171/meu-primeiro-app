@@ -318,3 +318,15 @@ html,body,#root{width:100%;max-width:100%;min-width:0}body{overflow-x:hidden}.ap
 .dash-flow-legend b{font-size:18px}
 .dash-flow-legend small{font-size:11px;line-height:1.35}
 @media(max-width:480px){.dash-flow-composition{gap:10px}.dash-flow-donut{width:158px;height:158px;flex-basis:158px}.dash-flow-legend{min-width:130px;padding-left:8px}.dash-flow-legend>div>i{width:17px;flex-basis:17px;margin-left:-19px}.dash-flow-legend b{font-size:15px}}
+
+
+/* Monthly balance as an external donut callout, independent from slice geometry */
+.dash-flow-center{gap:0}
+.dash-flow-center small{font-size:10px;letter-spacing:.12em;text-align:center;line-height:1.4}
+.dash-flow-legend .dash-balance-callout{margin-top:2px;padding-top:13px;border-top:1px solid #e9edf2}
+.dash-flow-legend .dash-balance-callout .balance-leader{width:24px;height:2px;flex:0 0 24px;margin:8px 0 0 -25px;background:#8290a3;transform:rotate(-8deg);transform-origin:right center;border-radius:2px}
+.dash-flow-legend .dash-balance-callout b{font-size:19px;color:#26364e}
+.dash-flow-legend .dash-balance-callout b.negative{color:#d94f55}
+.dash-flow-legend .dash-balance-callout b.positive{color:#238866}
+.dash-flow-legend .dash-balance-callout span:after{display:none}
+@media(max-width:480px){.dash-flow-legend .dash-balance-callout .balance-leader{width:17px;flex-basis:17px;margin-left:-19px}.dash-flow-legend .dash-balance-callout b{font-size:16px}}
