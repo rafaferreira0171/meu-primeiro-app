@@ -26,6 +26,18 @@ if old_negative in s:
     s = s.replace(old_negative, new_negative, 1)
 elif 'className="negative-months-card"' not in s:
     raise SystemExit('Negative-month KPI target not found; refusing to continue')
+
+# Replace only the projected balance evolution chart with a mobile-first line chart.
+trend_start = s.find('<Section title={`Evolução do saldo')
+if trend_start >= 0:
+    trend_end = s.find('</Section>', trend_start)
+    if trend_end < 0:
+        raise SystemExit('Balance evolution section is incomplete')
+    trend_end += len('</Section>')
+    trend_markup = '''<Section title={`Evolução do Saldo (Projetado)`}><div className="balance-evolution-card"><div className="balance-evolution-highlights"><div className="balance-evolution-total"><span>Saldo projetado no período</span><strong>{BRL(rows.reduce((sum,x)=>sum+x.balance,0))}</strong></div><div className="balance-evolution-extremes"><div className="balance-extreme best"><span>Melhor mês</span><b>{best.m}</b><strong>{BRL(best.balance)}</strong></div><div className="balance-extreme worst"><span>Pior mês</span><b>{worst.m}</b><strong>{BRL(worst.balance)}</strong></div></div></div><div className="balance-line-chart"><svg viewBox="0 0 340 164" role="img" aria-label="Evolução projetada do saldo nos próximos 12 meses" preserveAspectRatio="none"><defs><linearGradient id="balance-positive-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#2f9b79" stopOpacity=".22"/><stop offset="100%" stopColor="#2f9b79" stopOpacity="0"/></linearGradient></defs>{[-1,0,1].map(v=><line key={v} x1="10" x2="330" y1={82-v*58} y2={82-v*58} stroke={v===0?'#9aa8b8':'#edf1f4'} strokeDasharray={v===0?'4 4':'0'} strokeWidth="1"/>)}{rows.slice(0,-1).map((x,i)=>{const y1=82-(x.balance/maxAbs)*58,y2=82-(rows[i+1].balance/maxAbs)*58,x1=14+i*(312/Math.max(1,rows.length-1)),x2=14+(i+1)*(312/Math.max(1,rows.length-1));return <line key={x.m} x1={x1} y1={y1} x2={x2} y2={y2} stroke={x.balance<0||rows[i+1].balance<0?'#d94b4b':'#2f9b79'} strokeWidth="3" strokeLinecap="round"/>})}{rows.map((x,i)=>{const cx=14+i*(312/Math.max(1,rows.length-1)),cy=82-(x.balance/maxAbs)*58;return <g key={x.m}><circle cx={cx} cy={cy} r="4.5" fill="#fff" stroke={x.balance<0?'#d94b4b':'#2f9b79'} strokeWidth="2.5"/><text x={cx} y="153" textAnchor="middle" fontSize="8" fill="#64748b">{['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][Number(x.m.slice(5,7))-1]}</text></g>})}</svg></div></div></Section>'''
+    s = s[:trend_start] + trend_markup + s[trend_end:]
+elif 'className="balance-line-chart"' not in s:
+    raise SystemExit('Balance evolution section not found; refusing to continue')
 p.write_text(s)
 
 css_path = Path('src/mobile.css')
